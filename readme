@@ -1,0 +1,36 @@
+Document Header 
+Project Name: S2S(Student to Student)
+Requirements and Specification Document
+02/19/2022, version __iteration 0___ (please provide a color code for each iteration so we can track changes)
+Project Abstract
+A one paragraph summary of what the software will do.
+it is a second-hand market(roughly). Services we provide are:
+Clients are able to communicate with each other
+Clients are able to post pictures & paragraphs to describe their stuff.
+Clients are able to implement the location of their living place.
+(May be similar to what was presented in the proposal)
+Competitive analysis (proposal)
+Other second-hand sites will be the main competitors, our website will also help students find other students who have the same course they are taking this semester. It provides a study platform. This app helps students save money on book purchases and may allow multiple students (limit number) to rent or purchase the same book at the same time, in this case they can share books and save money.
+Do the requirements avoid specifying a design (customer-specified design elements are allowed) ?(proposal)
+The customers are normal university students in Canada. Our webs suit all target customers which does not need to be changed by specific groups.
+Do you believe all parts are possible to implement? (proposal)
+All parts are possible for us if all the group members study Cmpt276 very well. The target population is all SFU students. Group members can put up posters advertising the site on campus. We can also spread the word among our friends, ask them to act as our testers and make suggestions to improve our website. One of our group members is very good at painting. She can design the web very well. We use Google Maps to lock down the location of the seller so that the buyer can locate the seller.  
+
+
+
+Is the project scope big enough? (proposal)
+Our web-app has wonderful functions above the simple second-hand market. Not only buying and selling, but offering a platform to students to find the same courses or majors classmates. 
+ 
+Customer
+A brief description of the customer for this software. There may be multiple types of Customers here. (May be similar to what was presented in the proposal)
+In the beginning, our target customers are all university students around Canada. 
+ Do the requirements state the customer’s needs? (from proposal)
+
+
+User Stories
+This section will include the specification for your project in the form of user stories. The section should start with a short description of the actors involved (e.g., regular user, administrator, ...) and then follow with a list of the user stories. For each user story you should have at least: Name, Actors, Triggers/Preconditions (what initiates the story and in what system state does the story apply), Actions/Postconditions (what actions will the code take to implement the user story and what is the result of the system state after the story is over), Acceptance tests (list one or more acceptance tests with concrete values for the parameters, and concrete assertions that you will make to verify the postconditions). Each user story should also have a field called "Iteration" where you specify in which iteration you implemented or plan to implement this feature.
+(1)Students who want to sell books don't need to create an account – SignUp (done in iteration 1). After they have their account and log in successfully, they can start filling in specific information(book name,for which course, intention of selling or renting out) about the book they want to sell, as well as indicating price. All users can fill in information about themselves(e.g. the name of universities they are attending, how to contact them if they don’t want to use the chat platform in the application)(done in iteration 1).
+(2)The students who are looking for books can go into the application directly without loging in or registration, they can use most of the function of the application(eg: search books), but if they want to chat with the sellers, they need to login in for the chat function. (sign in function will be done in iteration 1, chat function may be done in iteration 3)
+(3)For the managers, they can directly check all the books in store, they can force products to be taken down(done in iteration 2), if such cases happen, sellers of taken-down products will be informed. They can also chat with sellers. when they chat with other users, their name will be in a different form(eg: managers). They can disable the user's account if the user uses the application improperly (they will contact users who break the rules first)(done in iteration 3).
+(4) Students who want to find their classmates for a specific course. They can use the features provided by the application to find who is using the application and if they are from the same university and the same course.(done in iteration 2 or 3)
+
