@@ -11,6 +11,7 @@ const app = express()
   app.get('/login', (req, res) => res.render('pages/login'))
   app.get('/register', (req, res) => res.render('pages/register'))
   app.post('/login' , (req, res) => {
+    res.send("hello");
 
   })
   app.post('/register' , (req, res) => {
