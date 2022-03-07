@@ -1,3 +1,4 @@
+const { name } = require('ejs');
 const express = require('express')
 const path = require('path')
 const PORT = process.env.PORT || 5000
@@ -25,31 +26,53 @@ const app = express()
 
   })
   app.post('/register' , async (req, res) => {
-    const userdata = req.body
+    const data = req.body
 
-    if(!userdata.name)
+    if(!data.name)
     {
       return res.status(400).send('missing name')
     }
-    if(!userdata.Useraccount)
+    if(!data.Useraccount)
     {
       return res.status(400).send('missing Useraccount')
     }
-    if(!userdata.password)
+    if(!data.password)
     {
       return res.status(400).send('missing password')
     }
-    if(!userdata.Confirmpassword)
+    if(!data.Confirmpassword)
     {
       return res.status(400).send('missing Confirmpassword')
     }
     //control password length?
-    if(userdata.password != userdata.Confirmpassword)
+    if(data.password != userdata.Confirmpassword)
     {
       return res.status(400).send('different passwords') //400？
     }
-    else{ //checking if there is same account
+    else{
+      pool.query(`SELECT * FROM users where account = $1`, [data.Useraccount],(err,results)=>{
+        if(err){
+          throw error
+        }
+        if(results.rows.length)
+        {
+          res.send("account is already exists.")
+        }
+        else{
+          pool.query(
+            `INSERT INTO user (name,account,password) VALUES ($1, $2, $3)`, [data.name, data.Useraccount, data.password], 
+            (err,results)=>{
+              if(err)
+              {
+                throw err
+              }
+              res.status(201).send("User created successfully")
+            }
+          )
+        }
+      })
       
     }
+    //using session to auto login
   })
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
