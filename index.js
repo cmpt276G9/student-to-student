@@ -22,6 +22,7 @@ const app = express()
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/dashboard', (req, res) => res.render('pages/dashboard'))
   app.post('/login' , (req, res) => {
+    // just test 
     res.send("hello");
 
   })
