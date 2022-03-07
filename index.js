@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 5000
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:root@localhost/cmpt276"
+  "postgres://postgres:[password]@localhost/db_dir"
   // ssl: {
   //   rejectUnauthorized: false
   // }
