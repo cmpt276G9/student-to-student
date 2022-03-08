@@ -2,11 +2,12 @@ const { name } = require('ejs');
 const express = require('express')
 const path = require('path')
 const PORT = process.env.PORT || 5000
-
+const session = require('express-session')
+const flash = require('express-flash')
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:[password]@localhost/db_dir"
+  "postgres://postgres:2123257@localhost/login"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -14,6 +15,12 @@ const pool = new Pool({
 
 const app = express()
   app.use(express.urlencoded({ extended: false }))
+  app.use(session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+  }))
+  app.use(flash())
   app.use(express.static(path.join(__dirname, 'public')))
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
@@ -46,14 +53,14 @@ const app = express()
       return res.status(400).send('missing Confirmpassword')
     }
     //control password length?
-    if(data.password != userdata.Confirmpassword)
+    if(data.password != data.Confirmpassword)
     {
       return res.status(400).send('different passwords') //400？
     }
     else{
       pool.query(`SELECT * FROM users where account = $1`, [data.Useraccount],(err,results)=>{
         if(err){
-          throw error
+          throw err
         }
         if(results.rows.length)
         {
@@ -61,7 +68,7 @@ const app = express()
         }
         else{
           pool.query(
-            `INSERT INTO user (name,account,password) VALUES ($1, $2, $3)`, [data.name, data.Useraccount, data.password], 
+            `INSERT INTO users (name,account,password) VALUES ($1, $2, $3)`, [data.name, data.Useraccount, data.password], 
             (err,results)=>{
               if(err)
               {
@@ -75,5 +82,30 @@ const app = express()
       
     }
     //using session to auto login
+      //function remember(passport)
+  //{
+    //const autheticalUser = (Useraccount1, password1,done)=>{
+      //pool.query(
+        //`SELECT * FROM users where account = $1`, [Useraccount1], (error, results) =>{
+          //if(error)
+            //throw error
+          //if(results.rows.length){
+            //const temp = results.rows[0];
+
+          //}
+        //}
+      //)
+    //}
+    //passport.use(
+      //new strage(new strage({
+        //usernameField: "text",
+        //passwordField: "password",
+      //},
+      //autheticalUser
+      //)
+      //)
+    //)
+  //}
+  //using session to auto login
   })
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
