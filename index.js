@@ -18,10 +18,10 @@ const app = express()
   // app.use(cookieParser());  
   app.use(session({
   name: "session",
-  secret: 'zordon resurrection',
+  secret: 'elden ring',
   resave: false, //Forces the session to be saved back to the session store
   saveUninitialized: false, //Forces a session that is "uninitialized" to be saved to the store
-  cookie: {maxAge: 30 * 60 * 1000} // 30 minutes
+  maxAge: 30 * 60 * 1000 // 30 minutes
 
   }))
   app.use(express.urlencoded({ extended: false }))
