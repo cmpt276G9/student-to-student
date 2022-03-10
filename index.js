@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:[password]@localhost/s2s"
+  "postgres://postgres:2123257@localhost/users"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -69,10 +69,12 @@ const app = express()
     })
 
   })
-  app.post('/logout', async(req,res)=>{
-    req.session.destroy();
-    res.redirect('/');
-  })
+  app.get("/logout", function(req, res) {
+    req.session.destroy(() => {
+     req.logout();
+     res.redirect("/");
+    })
+   });
   app.post('/register' , async (req, res) => {
     const data = req.body
 
@@ -84,6 +86,10 @@ const app = express()
     {
       return res.status(400).send('missing Useraccount')
     }
+     if(!data.Useraccount)
+     {
+       return res.status(400).send('missing Useraccount')
+     }
     if(!data.password)
     {
       return res.status(400).send('missing password')
@@ -98,15 +104,15 @@ const app = express()
       return res.status(400).send('different passwords') //400？
     }
     else{
-      pool.query(`SELECT * FROM userprof where useraccount = $1`, [data.Useraccount],(err,results)=>{
-        if(err){
-          throw error
-        }
-        if(results.rows.length)
-        {
-          res.send("account is already exists.")
-        }
-        else{
+       pool.query(`SELECT * FROM userprof where account = $1`, [data.Useraccount],(err,results)=>{
+         if(err){
+           throw error
+         }
+         if(results.rows.length)
+         {
+           res.send("account is already exists.")
+         }
+         else{
           pool.query(
             `INSERT INTO userprof (useraccount,uname,password) VALUES ($1, $2, $3)`, [data.Useraccount,data.name, data.password], 
             (err,results)=>{
@@ -116,10 +122,8 @@ const app = express()
               }
               res.status(201).send("User created successfully")
             })
-        }
-      })
-      
+          }
+        })
     }
-    //using session to auto login
   })
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
