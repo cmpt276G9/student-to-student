@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:2123257@localhost/users"
+  "postgres://postgres:@localhost/s2s"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -29,19 +29,35 @@ const app = express()
   app.set('views', path.join(__dirname, 'views')) 
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
-  app.get('/login', (req, res) => res.render('pages/login'))
+  app.get('/login', (req, res) => {
+    console.log(req.session.user)
+    if(req.session.user != null){
+      console.log(req.session.user)
+      console.log("coming in session")
+      var dataset = {useraccount: req.session.useraccount, 
+        name: req.session.user.name, password: req.session.password};
+      res.render('pages/dashboard', dataset);
+    }
+    res.render('pages/login')
+  })
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/dashboard', async(req, res) =>{ 
-    res.render('pages/dashboard', req.session.user);
+    console.log(req.session.user);
+    var dataset = {useraccount: req.session.useraccount, 
+      name: req.session.user.name, password: req.session.password};
+    res.render('pages/dashboard', dataset);
   })
-  app.post('/login' , (req, res) => {
+  app.post('/logindata' , (req, res) => {
     // 
     //check if req.session has number:
-    if(!req.sessionID){
-      res.render('pages/dashboard', req.session.user)
-    }
+    // console.log(req.session.user)
+    // if(req.session.user){
+    //   var dataset = {useraccount: req.session.user.useraccount, 
+    //     name: req.session.user.name, password: req.session.user.password};
+    //   res.render('pages/dashboard', dataset);
+    // }
     var data = req.body;
-    console.log(data.Useraccount);
+    //console.log(data.Useraccount);
     var userQuery = `SELECT * FROM userprof where useraccount = '${data.Useraccount}'`;
     pool.query(userQuery, async(error,results)=>{
       if(error){
@@ -59,10 +75,10 @@ const app = express()
               //check if login user is a manager: future feature
               var user = {useraccount: r.useraccount, name: r.uname, password: r.password};
               req.session.user = user;
-              console.log(req.session.user.name);
+              //console.log(req.session.user.name);
               //if loging user is a manager, then go to manager dashboard
-              res.send(`Hey there, ${req.session.user.name} welcome <a href=\'/logout'>click to logout</a>
-              click here to go to dashboard page <a href=\'/dashboard'>click to logout</a>`)
+              res.send(`Hey there, ${req.session.user.name} welcome <a href=\'/logout'>click to logout</a><br>
+              click here to go to dashboard page <a href=\'/dashboard'>click to go to dashboard</a>`)
             }
         }) 
       }
@@ -70,10 +86,13 @@ const app = express()
 
   })
   app.get("/logout", function(req, res) {
-    req.session.destroy(() => {
-     req.logout();
-     res.redirect("/");
-    })
+    req.session.destroy(err => {
+      if (err) {
+        res.status(400).send('Unable to log out')
+      } else {
+        res.send(`Logout successful, click here to go to <a href=\'/'>home page</a> `)
+      }
+    });
    });
   app.post('/register' , async (req, res) => {
     const data = req.body
