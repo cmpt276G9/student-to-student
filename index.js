@@ -123,26 +123,27 @@ const app = express()
       return res.status(400).send('different passwords') //400？
     }
     else{
-       pool.query(`SELECT * FROM userprof where account = $1`, [data.Useraccount],(err,results)=>{
-         if(err){
-           throw error
-         }
-         if(results.rows.length)
-         {
-           res.send("account is already exists.")
-         }
-         else{
-          pool.query(
-            `INSERT INTO userprof (useraccount,uname,password) VALUES ($1, $2, $3)`, [data.Useraccount,data.name, data.password], 
+      pool.query(`SELECT * FROM userprof where account = ${data.Useraccount}`,async(err,results)=>{
+        if(err){
+          var registerquery = `INSERT INTO userprof (useraccount, uname, password, role) 
+          VALUES ('${data.Useraccount}','${data.name}','${data.password}',1)`;
+          //console.log(registerquery);
+          pool.query( registerquery,
             (err,results)=>{
               if(err)
               {
-                throw err
+                throw err;
               }
-              res.status(201).send("User created successfully")
+              else{
+                res.status(201).send(`User created successfully, click here to go back to <a href=\'/login'>login</a> page`)
+              }
             })
           }
-        })
+        else
+        {
+          res.send(`account is already exists. click here to go back to <a href=\'/'>home</a> page`);
+        }
+      })
     }
   })
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
