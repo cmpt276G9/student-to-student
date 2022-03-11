@@ -7,11 +7,11 @@ const PORT = process.env.PORT || 5000
 
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:1234@localhost/postgres"
-  // ssl: {
-  //   rejectUnauthorized: false
-  // }
+  connectionString: process.env.DATABASE_URL,  
+  //"postgres://postgres:@localhost/s2s"
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const app = express()
@@ -30,6 +30,7 @@ const app = express()
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/login', (req, res) => {
+    //potential error: cannot set headers after they are sent to the client(future improvement)
     // console.log(req.session.user)
     if(req.session.loggedin){
       //console.log(req.session.user)
@@ -55,8 +56,11 @@ const app = express()
   })
   app.get('/manager_dashboard',(req,res)=>{
     if(req.session.loggedin){
-      if(req.session.user.role = 0)
-        res.render('/manager_dashboard');
+      if(req.session.user.role = 0){
+        var dataset = {useraccount: req.session.user.useraccount, 
+          name: req.session.user.name, password: req.session.user.password};
+        res.render('/manager_dashboard', dataset);
+      }
       else
         res.send('You do not have permission to view this page')
       }
