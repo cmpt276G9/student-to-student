@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 5000
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:@localhost/s2s"
+  "postgres://postgres:1234@localhost/postgres"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -30,22 +30,40 @@ const app = express()
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/login', (req, res) => {
-    console.log(req.session.user)
-    if(req.session.user != null){
-      console.log(req.session.user)
-      console.log("coming in session")
-      var dataset = {useraccount: req.session.useraccount, 
-        name: req.session.user.name, password: req.session.password};
+    // console.log(req.session.user)
+    if(req.session.loggedin){
+      //console.log(req.session.user)
+      //console.log("coming in session")
+      var dataset = {useraccount: req.session.user.useraccount, 
+        name: req.session.user.name, password: req.session.user.password};
       res.render('pages/dashboard', dataset);
     }
     res.render('pages/login')
   })
   app.get('/register', (req, res) => res.render('pages/register'))
-  app.get('/dashboard', async(req, res) =>{ 
-    console.log(req.session.user);
-    var dataset = {useraccount: req.session.useraccount, 
-      name: req.session.user.name, password: req.session.password};
-    res.render('pages/dashboard', dataset);
+  app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
+  app.get('/dashboard',async(req, res) =>{ 
+    if(req.session.loggedin){
+      var dataset = {useraccount: req.session.user.useraccount, 
+        name: req.session.user.name, password: req.session.user.password};
+      res.render('pages/dashboard', dataset);
+    }
+    else{
+      res.send('Please login to view this page!')
+    }
+    res.end()
+  })
+  app.get('/manager_dashboard',(req,res)=>{
+    if(req.session.loggedin){
+      if(req.session.user.role = 0)
+        res.render('/manager_dashboard');
+      else
+        res.send('You do not have permission to view this page')
+      }
+      else{
+        res.send('Please login to view this page!')
+      }
+      res.end()
   })
   app.post('/logindata' , (req, res) => {
     // 
@@ -61,7 +79,7 @@ const app = express()
     var userQuery = `SELECT * FROM userprof where useraccount = '${data.Useraccount}'`;
     pool.query(userQuery, async(error,results)=>{
       if(error){
-        res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
+        return res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
         //potential improvement: print error messages under form in .ejs
       }
       else{
@@ -73,18 +91,49 @@ const app = express()
             }
             else{//password matches:
               //check if login user is a manager: future feature
-              var user = {useraccount: r.useraccount, name: r.uname, password: r.password};
+              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role};
+              req.session.loggedin = true;
               req.session.user = user;
+              if(r.role == 1)
+              {
               //console.log(req.session.user.name);
               //if loging user is a manager, then go to manager dashboard
-              res.send(`Hey there, ${req.session.user.name} welcome <a href=\'/logout'>click to logout</a><br>
-              click here to go to dashboard page <a href=\'/dashboard'>click to go to dashboard</a>`)
+              res.redirect("/dashboard")
+              }
+              else
+              {
+                req.session.user.role = 0;
+                res.redirect("/manager_dashboard")
+              }
             }
         }) 
       }
     })
-
   })
+  // app.post('/auth', function(req, res) {
+  //   const userdata = req.body
+  //   if (userdata.Useraccount && userdata.password) {
+  //     // Execute SQL query that'll select the account from the database based on the specified username and password
+  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
+  //       // If there is an issue with the query, output the error
+  //       if (error) {throw error}
+  //       // If the account exists
+  //       if (results.length > 0) {
+  //         // Authenticate the user
+  //         req.session.loggedin = true;
+  //         req.session.username = username;
+  //         // Redirect to home page
+  //         res.redirect('/home');
+  //       } else {
+  //         res.send('Incorrect Username and/or Password!');
+  //       }			
+  //       res.end();
+  //     });
+  //   } else {
+  //     res.send('Please enter Username and Password!');
+  //     res.end();
+  //   }
+  // })
   app.get("/logout", function(req, res) {
     req.session.destroy(err => {
       if (err) {
@@ -123,27 +172,28 @@ const app = express()
       return res.status(400).send('different passwords') //400？
     }
     else{
-      pool.query(`SELECT * FROM userprof where account = ${data.Useraccount}`,async(err,results)=>{
+      pool.query(`SELECT * FROM userprof where useraccount = $1`, [data.Useraccount],(err,results)=>{
         if(err){
-          var registerquery = `INSERT INTO userprof (useraccount, uname, password, role) 
-          VALUES ('${data.Useraccount}','${data.name}','${data.password}',1)`;
-          //console.log(registerquery);
-          pool.query( registerquery,
-            (err,results)=>{
-              if(err)
-              {
-                throw err;
-              }
-              else{
-                res.status(201).send(`User created successfully, click here to go back to <a href=\'/login'>login</a> page`)
-              }
-            })
-          }
-        else
-        {
-          res.send(`account is already exists. click here to go back to <a href=\'/'>home</a> page`);
+          throw err
         }
-      })
-    }
+        if(results.rows.length)
+        {
+          res.send("account is already exists.")
+        }
+        else{
+         pool.query(
+           `INSERT INTO userprof (useraccount,uname,password,role) VALUES ($1, $2, $3,$4)`, [data.Useraccount,data.name, data.password,1], 
+           (err,results)=>{
+             if(err)
+             {
+               throw err
+             }
+             res.status(201)
+             res.redirect("/")
+           })
+         }
+       })
+   }
   })
+
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
