@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 5000
 
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,  
-  // "postgres://postgres:@localhost/s2s"
+  connectionString: process.env.DATABASE_URL, 
+  //  "postgres://postgres:@localhost/s2s"
   ssl: {
     rejectUnauthorized: false
   }
@@ -54,12 +54,13 @@ const app = express()
     }
     res.end()
   })
-  app.get('/manager_dashboard',(req,res)=>{
+  app.get('/manager_dashboard',async(req,res)=>{
     if(req.session.loggedin){
-      if(req.session.user.role = 0){
+      //console.log(req.session.user.role);
+      if(req.session.user.role == 0){
         var dataset = {useraccount: req.session.user.useraccount, 
           name: req.session.user.name, password: req.session.user.password};
-        res.render('/manager_dashboard', dataset);
+        res.render('pages/manager_dashboard', dataset);
       }
       else
         res.send('You do not have permission to view this page')
@@ -106,7 +107,6 @@ const app = express()
               }
               else
               {
-                req.session.user.role = 0;
                 res.redirect("/manager_dashboard")
               }
             }
