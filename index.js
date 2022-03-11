@@ -7,11 +7,11 @@ const PORT = process.env.PORT || 5000
 
 const { Pool } = require('pg');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,  
-  //"postgres://postgres:@localhost/s2s"
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL||  
+  "postgres://postgres:@localhost/s2s"
+  // ssl: {
+  //   rejectUnauthorized: false
+  // }
 });
 
 const app = express()
@@ -32,13 +32,13 @@ const app = express()
   app.get('/login', (req, res) => {
     //potential error: cannot set headers after they are sent to the client(future improvement)
     // console.log(req.session.user)
-    if(req.session.loggedin){
-      //console.log(req.session.user)
-      //console.log("coming in session")
-      var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password};
-      res.render('pages/dashboard', dataset);
-    }
+    // if(req.session.loggedin){
+    //   //console.log(req.session.user)
+    //   //console.log("coming in session")
+    //   var dataset = {useraccount: req.session.user.useraccount, 
+    //     name: req.session.user.name, password: req.session.user.password};
+    //   res.render('pages/dashboard', dataset);
+    // }
     res.render('pages/login')
   })
   app.get('/register', (req, res) => res.render('pages/register'))
