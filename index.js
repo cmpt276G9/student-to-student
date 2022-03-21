@@ -17,11 +17,11 @@ const pool = new Pool({
 const app = express()
   // app.use(cookieParser());  
   app.use(session({
-    name: "session",
-    secret: 'elden ring',
-    resave: false, //Forces the session to be saved back to the session store
-    saveUninitialized: false, //Forces a session that is "uninitialized" to be saved to the store
-    maxAge: 30 * 60 * 1000 // 30 minutes
+  name: "session",
+  secret: 'elden ring',
+  resave: false, //Forces the session to be saved back to the session store
+  saveUninitialized: false, //Forces a session that is "uninitialized" to be saved to the store
+  maxAge: 30 * 60 * 1000 // 30 minutes
 
   }))
   app.use(express.urlencoded({ extended: false }))
@@ -30,19 +30,22 @@ const app = express()
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/login', (req, res) => {
-    //potential error: cannot set headers after they are sent to the client(future improvement)
     // console.log(req.session.user)
-    // if(req.session.loggedin){
-    //   //console.log(req.session.user)
-    //   //console.log("coming in session")
-    //   var dataset = {useraccount: req.session.user.useraccount, 
-    //     name: req.session.user.name, password: req.session.user.password};
-    //   res.render('pages/dashboard', dataset);
-    // }
+    if(req.session.loggedin){
+      //console.log(req.session.user)
+      //console.log("coming in session")
+      var dataset = {useraccount: req.session.user.useraccount, 
+        name: req.session.user.name, password: req.session.user.password};
+      res.render('pages/dashboard', dataset);
+    }
     res.render('pages/login')
   })
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
+  app.get('/findbook', (req, res) => res.render('pages/findbook'))
+  app.get('/sellmorebook',(req, res) => res.render('pages/sellmorebook'))
+  app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
+  app.get('/sellbook', (req, res) => res.render('pages/sellbook'))
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
@@ -54,14 +57,10 @@ const app = express()
     }
     res.end()
   })
-  app.get('/manager_dashboard',async(req,res)=>{
+  app.get('/manager_dashboard',(req,res)=>{
     if(req.session.loggedin){
-      //console.log(req.session.user.role);
-      if(req.session.user.role == 0){
-        var dataset = {useraccount: req.session.user.useraccount, 
-          name: req.session.user.name, password: req.session.user.password};
-        res.render('pages/manager_dashboard', dataset);
-      }
+      if(req.session.user.role = 0)
+        res.render('/manager_dashboard');
       else
         res.send('You do not have permission to view this page')
       }
@@ -107,6 +106,7 @@ const app = express()
               }
               else
               {
+                req.session.user.role = 0;
                 res.redirect("/manager_dashboard")
               }
             }
