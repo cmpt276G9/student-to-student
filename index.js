@@ -4,11 +4,13 @@ const path = require('path')
 const session = require("express-session")
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 5000 
-
 const { Pool } = require('pg');
+const { connect } = require('http2');
+const multer = require('multer');
+const { memoryStorage } = require('multer');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:1234@localhost/postgres"
+  "postgres://postgres:2123257@localhost/login"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -29,6 +31,18 @@ const app = express()
   app.set('views', path.join(__dirname, 'views')) 
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
+  app.get('/books/:id',async(req,res)=>{
+    const id = req.params.id
+    pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
+      if(error)
+      {
+        throw error
+      } 
+      bookdata = results.rows
+      res.render('pages/bookdetail',bookdata)
+      //怎么render进去？
+    })
+  })
   app.get('/login', (req, res) => {
     // console.log(req.session.user)
     if(req.session.loggedin){
@@ -40,12 +54,28 @@ const app = express()
     }
     res.render('pages/login')
   })
+  const filestorage = multer.diskStorage({
+    destination: (req,file, cb) =>{
+      cb(null,"./public/image")
+    },
+    filename: (req,file,cb) =>{
+      cb(null,Date.now() + "--" + file.originalname)
+    },
+  })
+  // const upload = multer({storage:filestorage})
+  const upload = multer({storage:multer.memoryStorage()})
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
-  app.get('/findbook', (req, res) => res.render('pages/findbook'))
-  app.get('/sellmorebook',(req, res) => res.render('pages/sellmorebook'))
+  app.get('/findbook', (req, res) =>{
+      pool.query(`SELECT * FROM books`,(error,result)=>{
+        if(error)
+          res.end(error)
+        var results = {'rows': result.rows}
+        res.render('pages/findbook',results)
+      })
+    })
+  app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
-  app.get('/sellbook', (req, res) => res.render('pages/sellbook'))
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
@@ -114,30 +144,6 @@ const app = express()
       }
     })
   })
-  // app.post('/auth', function(req, res) {
-  //   const userdata = req.body
-  //   if (userdata.Useraccount && userdata.password) {
-  //     // Execute SQL query that'll select the account from the database based on the specified username and password
-  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
-  //       // If there is an issue with the query, output the error
-  //       if (error) {throw error}
-  //       // If the account exists
-  //       if (results.length > 0) {
-  //         // Authenticate the user
-  //         req.session.loggedin = true;
-  //         req.session.username = username;
-  //         // Redirect to home page
-  //         res.redirect('/home');
-  //       } else {
-  //         res.send('Incorrect Username and/or Password!');
-  //       }			
-  //       res.end();
-  //     });
-  //   } else {
-  //     res.send('Please enter Username and Password!');
-  //     res.end();
-  //   }
-  // })
   app.get("/logout", function(req, res) {
     req.session.destroy(err => {
       if (err) {
@@ -199,5 +205,53 @@ const app = express()
        })
    }
   })
-
+  app.post('/addbook', upload.single('bookCover'),(req,res)=>{
+    const bookdata = req.body
+    if(!bookdata.Bookname)
+    {
+      return res.status(400).send('missing book title')
+    }
+    if(!bookdata.Author)
+    {
+      return res.status(400).send('missing Author')
+    }
+    if(!bookdata.Pages)
+    {
+      return res.status(400).send('missing Pages')
+    }
+    if(!bookdata.date)
+    {
+      return res.status(400).send('date')
+    }
+    if(!bookdata.Language)
+    {
+      return res.status(400).send('missing Language')
+    }
+    if(!bookdata.Course)
+    {
+      return res.status(400).send('missing Course')
+    }
+    // if(!req.file)
+    // {
+    //   return res.status(400).send('missing book cover')
+    // }
+    if(!bookdata.price)
+    {
+      return res.status(400).send('missing price')
+    }
+    else{
+      image = req.file.buffer.toString('base64')
+      var userdata = {name: req.session.user.name};
+      // 要不要检测是否为重复的书？（应该不用)
+      // 这里的seller，上架日期，描述，暂时没加进去
+      //seller有一些瑕疵...
+      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,userdata,bookdata.date,
+        bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
+          if(err)
+            throw err
+          res.status(201)
+          res.redirect("/findbook")
+        })
+    }
+  })
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))

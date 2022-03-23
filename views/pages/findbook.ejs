@@ -32,3 +32,13 @@
           search (title) <input type="text" name="bnames" /> 
             <input  type="submit" name="search" value = "search"/>
     </form>
+  </div>
+  <ul>
+    <% rows.forEach(function(r){ %>
+      <li>
+        <%=r.bookname%> selled by <%=r.seller%> and the cover <a href = "/books/<%= r.id %>"><img alt="Embedded Image" src ="data:image/png;base64,<%=r.imghere%>"></a> <%=r.description%>
+      </li>
+    <% }) %>
+  </ul>
+  </body>
+</html>

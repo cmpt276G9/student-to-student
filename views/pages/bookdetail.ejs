@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Bookname</th>
+        <th scope="col">author</th>
+        <th scope="col">pages</th>
+        <th scope="col">seller</th>
+        <th scope="col">publishdate</th>
+        <th scope="col">language</th>
+        <th scope="col">course</th>
+        <th scope="col">price</th>
+        <th scope="col">description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.forEach(function(r){ %> 
+        <tr>
+          <td><%= r.id %></td>
+          <td><%= r.bookname %></td>
+          <td><%= r.author %></td>
+          <td><%= r.pages %></td>
+          <td><%= r.seller %></td>
+          <td><%= r.publishdate %></td>
+          <td><%= r.language %></td>
+          <td><%= r.course %></td>
+          <td><%= r.price %></td>
+          <td><%= r.description %></td>
+        </tr>
+     <% } %>
+    </tbody>
+  </table>
+</body>
+</html>
