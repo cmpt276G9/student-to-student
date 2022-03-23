@@ -33,12 +33,27 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+    const startindex = (page-1)* limit
+    const endindex = page*limit
+    const results = {}
+    results.next ={
+      page: page+1,
+      limit: limit
+    }
+    if(startindex >0){
+      results.previous ={
+        page: page-1,
+        limit: limit
+      }
+    }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
         throw error
       } 
-      bookdata = results.rows
+      bookdata = {data: results.rows}
       res.render('pages/bookdetail',bookdata)
       //怎么render进去？
     })
