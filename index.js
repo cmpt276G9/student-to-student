@@ -114,30 +114,6 @@ const app = express()
       }
     })
   })
-  // app.post('/auth', function(req, res) {
-  //   const userdata = req.body
-  //   if (userdata.Useraccount && userdata.password) {
-  //     // Execute SQL query that'll select the account from the database based on the specified username and password
-  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
-  //       // If there is an issue with the query, output the error
-  //       if (error) {throw error}
-  //       // If the account exists
-  //       if (results.length > 0) {
-  //         // Authenticate the user
-  //         req.session.loggedin = true;
-  //         req.session.username = username;
-  //         // Redirect to home page
-  //         res.redirect('/home');
-  //       } else {
-  //         res.send('Incorrect Username and/or Password!');
-  //       }			
-  //       res.end();
-  //     });
-  //   } else {
-  //     res.send('Please enter Username and Password!');
-  //     res.end();
-  //   }
-  // })
   app.get("/logout", function(req, res) {
     req.session.destroy(err => {
       if (err) {
