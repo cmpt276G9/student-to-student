@@ -69,3 +69,23 @@
 .table{
   text-align: center;
 }
+.uaccount{
+  margin-top: 50px;
+  width: 500px;
+  height: 20px;
+}
+.msgbar{
+  width: 500px;
+  height: 500px;
+}
+
+.minibut{
+  margin-left: 2%;
+  width: 50px;
+  height: 50px;
+}
+
+.tableee{
+  margin-left: 2%;
+}
+
