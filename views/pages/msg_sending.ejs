@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,14 +7,12 @@
     </head>
   <head>
 <link rel="stylesheet" href="stylesheets/home.css" media="screen">
-<link rel="stylesheet" href="stylesheets/sellbook.css" media="screen">
+
     <script> 
     </script>
     
   </head>
-  <body class = "back"><header class = "wit">
-  <div>
- 
+  <body class = "back"><header class = "wit"><div>
         <a href="/#"  data-image-width="200" data-image-height="200">
           <img src="image/s2s2.png" class = "logo">
         </a>
@@ -27,9 +26,13 @@
             </select>
             </ul>
         </header>
-        <div>
+              <div>
               <img  src="image/s2s-11.png"  alt="" class="biglogo">
           </div>
-        <div></><form action="/detail" method="get" class = "search">
-          search (course number) <input type="text" name="bnames" /> 
-            <input  type="submit" name="search" value = "search"/>
+        
+          <form action = "/msgstoring" method = "post">
+              <input class = "uaccount" type = "text" name = "uaccount" placeholder = "user you want send to"></input><br></br>
+              <input class = "msgbar" type = "text" name = "content" placeholder = "input what you want to send"></input>
+              <input type = "submit" ></input>
+          </form>
+</body>

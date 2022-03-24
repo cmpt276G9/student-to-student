@@ -18,9 +18,9 @@
         </a>
           </div>
           <br></br>
-            <ul class = "top"><a href="/#" style="padding: 10px 10px;">Home</a>
+            <ul class = "top"><a href="/manager_dashboard" style="padding: 10px 10px;">Home</a>
             <select onchange="window.location=this.value;">
-            <option>Hi!</option>
+            <option>Hi!<%= name %></option>
             <option value="/dashboard">User</option>
             <option value="/#">Logout</option> 
             </select>
@@ -34,7 +34,7 @@
             <div>
               <div class="sell">
                 <div ><span><img src="image/mbook.png" alt=""class= "pic"></span>
-                  <h5 class = "text">Manage used books</h5>
+                  <a href = "/manage_book" class = "text">Manage used books</a>
                   <p class = "text"> ​Manage used books that are on the shelf</p>
                 </div>
               </div>
@@ -47,7 +47,8 @@
                 </div>
               <div >
                 <div class = "classmate" ><span ><img src="image/muser.png" alt="" class= "pic"></span>
-                  <h5 class = "text">Manage user</h5>
+                <br>
+                  <a href="/manage_user"  class = "text">Manage user</a>
                   <p class = "text"> ​Manage users' personal information</p>
                 </div>
               </div>
@@ -58,4 +59,3 @@
       <div > </div>
     </section>
   </body>
-</html>

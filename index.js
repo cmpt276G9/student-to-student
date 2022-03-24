@@ -3,7 +3,9 @@ const express = require('express')
 const path = require('path')
 const session = require("express-session")
 const cookieParser = require("cookie-parser");
+var cors = require("cors")
 const PORT = process.env.PORT || 5000 
+
 const { Pool } = require('pg');
 const { connect } = require('http2');
 const multer = require('multer');
@@ -11,7 +13,7 @@ const { memoryStorage } = require('multer');
 var cors = require('cors')
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:2123257@localhost/login"
+  "postgres://postgres:@localhost/s2s"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -27,6 +29,8 @@ const app = express()
   maxAge: 30 * 60 * 1000 // 30 minutes
 
   }))
+  app.use("/", cors())
+  app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(express.static(path.join(__dirname, 'public')))
   app.use(express.json())
@@ -36,6 +40,21 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+    const startindex = (page-1)* limit
+    const endindex = page*limit
+    const results = {}
+    results.next ={
+      page: page+1,
+      limit: limit
+    }
+    if(startindex >0){
+      results.previous ={
+        page: page-1,
+        limit: limit
+      }
+    }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
@@ -51,12 +70,18 @@ const app = express()
     if(req.session.loggedin){
       //console.log(req.session.user)
       //console.log("coming in session")
-      var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password};
-      res.render('pages/dashboard', dataset);
+      if(req.session.user.role == 0){
+        res.redirect('/manager_dashboard');
+      }
+      else{
+        res.redirect('/dashboard');
+      }
     }
-    res.render('pages/login')
+    else{
+      res.render('pages/login')
+    }
   })
+
   const filestorage = multer.diskStorage({
     destination: (req,file, cb) =>{
       cb(null,"./public/image")
@@ -65,8 +90,18 @@ const app = express()
       cb(null,Date.now() + "--" + file.originalname)
     },
   })
-  // const upload = multer({storage:filestorage})
   const upload = multer({storage:multer.memoryStorage()})
+  app.get('/edit_info', (req, res) => res.render('pages/edit_info'))
+  app.post('/updateinfo',async(req,res) =>{
+    const id = req.session.user.id
+    var uage=req.body.age
+    var umajor=req.body.major
+    var uphonenumber=req.body.phonenumber
+    pool.query(`UPDATE userprof SET age = '${uage}' ,major = '${umajor}',phonenumber = '${uphonenumber}' WHERE id = '${id}';`,async(error,result)=>
+    {
+      res.render('pages/updateinfo', result);
+    })
+  })
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) =>{
     console.log('get user profile!!!')
@@ -87,46 +122,115 @@ const app = express()
       })
   })
   app.get('/findbook', (req, res) =>{
-    const page = parseInt(req.query.page)
-    const limit = parseInt(req.query.limit)
-    const startindex = (page-1)* limit
-    const endindex = page*limit
-    const results = {}
-    results.next ={
-      page: page+1,
-      limit: limit
-    }
-    if(startindex >0){
-      results.previous ={
-        page: page-1,
-        limit: limit
+    pool.query(`SELECT * FROM books`,(error,result)=>{
+      if(error)
+        res.end(error)
+      var results = {'rows': result.rows}
+      res.render('pages/findbook',results)
+    })
+  })
+  app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
+  app.get('/edit_info',(req, res) => res.render('pages/edit_info'))
+  app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
+  app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/manage_user', (req,res)=>{
+    if(req.session.loggedin){
+      if(req.session.user.role == 0){
+        var query = `SELECT * from userprof`;
+        pool.query(query, async(error, result)=>{
+          if(error){
+            res.status(404);
+            res.end(error);
+          }
+          else{
+            res.status(200);
+            var data = {info: result.rows};
+            res.render('pages/manage_user', data);
+          }
+        })
+      }
+      else{ 
+        res.status(401).send(`You do not have permission to view this page, <a href =\ '/dashboard'>click here</a> to go back to your main page`)
       }
     }
-    //SELECT * FROM books ORDER BY books.name LIMIT 10 OFFSET 10*page
-      pool.query(`SELECT * FROM books`,(error,result)=>{
-        if(error)
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
+  app.get('/manage_book',(req,res)=>{
+    if(req.session.loggedin){
+      if(req.session.user.role == 0){
+        pool.query(`SELECT * FROM books`,(error,result)=>{
+          if(error)
           res.end(error)
         var results = {'rows': result.rows}
-        res.render('pages/findbook',results)
-      })
+        res.render('pages/manage_book',results)
+        })
+      }
+      else{ 
+        res.status(401).send(`You do not have permission to view this page, <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+      }
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
+  app.post('/deletebook', (req,res)=>{
+    var bookid = req.body.bid;
+    pool.query(`delete from books where id = ${bookid}`, (err, result)=>{
+      if(err){
+        res.status(404).send('cannot find book id');
+      }
+      else{
+        res.send(`delete success <a href=\'/manager_dashboard'>click to go back to main page</a>`)
+      }
     })
-  app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
-  app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
+  })
+  app.post('/msgstoring', (req,res) =>{
+    if(!req.session.loggedin){
+      res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+    else{
+      var uac = req.session.user.useraccount;
+      var storequery = `UPDATE userprof SET msgsent = '${req.body.msgbar}' where useraccount = '${uac}'`;
+      var replacequery = `UPDATE userprof SET msgrec = '${req.body.msgbar}' where useraccount = '${req.body.uaccount}'`
+      pool.query(storequery, async(err,resu) =>{
+        if(err){
+          res.end(err)
+        }
+        else{
+          pool.query(replacequery, async(error,results)=>{
+            if(error){
+              res.end(error);
+            }
+            else{
+              res.send(`sending successful. <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+            }
+          })
+        }
+      })
+    }
+  })
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password, id: req.session.user.id};
+        name: req.session.user.name, password: req.session.user.password};
       res.render('pages/dashboard', dataset);
     }
     else{
-      res.send('Please login to view this page!')
+      
+      res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     res.end()
   })
-  app.get('/manager_dashboard',(req,res)=>{
+  app.get('/manager_dashboard', async(req,res)=>{
     if(req.session.loggedin){
-      if(req.session.user.role == 0)
-        res.render('pages/manager_dashboard');
+      if(req.session.user.role == 0){
+        //console.log("entering manager dashboard");
+        var dataset = {useraccount: req.session.user.useraccount, 
+          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role };
+        res.render('pages/manager_dashboard', dataset);
+      }
       else
         res.status(401)
         res.send('You do not have permission to view this page')
@@ -168,7 +272,7 @@ const app = express()
             }
             else{//password matches:
               //check if login user is a manager: future feature
-              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role, id : r.id};
+              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role , id : r.id};
               req.session.loggedin = true;
               req.session.user = user;
               if(r.role == 1)
@@ -187,6 +291,30 @@ const app = express()
       }
     })
   })
+  // app.post('/auth', function(req, res) {
+  //   const userdata = req.body
+  //   if (userdata.Useraccount && userdata.password) {
+  //     // Execute SQL query that'll select the account from the database based on the specified username and password
+  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
+  //       // If there is an issue with the query, output the error
+  //       if (error) {throw error}
+  //       // If the account exists
+  //       if (results.length > 0) {
+  //         // Authenticate the user
+  //         req.session.loggedin = true;
+  //         req.session.username = username;
+  //         // Redirect to home page
+  //         res.redirect('/home');
+  //       } else {
+  //         res.send('Incorrect Username and/or Password!');
+  //       }			
+  //       res.end();
+  //     });
+  //   } else {
+  //     res.send('Please enter Username and Password!');
+  //     res.end();
+  //   }
+  // })
   app.get("/logout", function(req, res) {
     req.session.destroy(err => {
       if (err) {
@@ -243,6 +371,7 @@ const app = express()
        })
    }
   })
+
   app.post('/addbook', upload.single('bookCover'),(req,res)=>{
     const bookdata = req.body
     if(!bookdata.Bookname)

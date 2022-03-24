@@ -8,15 +8,15 @@
 <link rel="stylesheet" href="stylesheets/home.css" media="screen">
     <script> 
     </script>
-    
   </head>
   <body class = "back"><header class = "wit"><div>
         <a href="/#"  data-image-width="200" data-image-height="200">
           <img src="image/s2s2.png" class = "logo">
         </a>
+        
         </div>
         <br></br>
-            <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+            <ul class = "top"><a href="/dashboard" style="padding: 10px 10px;">Home</a>
             <select onchange="window.location=this.value;">
             <option>Hi! <%= name %></option>
             <option value="/user_profile">Your account</option>
@@ -26,7 +26,12 @@
         </header>
       <section>
       <div>
-        <img  src="image/s2s-11.png"  alt="" class="biglogo">
+      <a href= "/message_sending"  data-image-width="200px" data-image-height="200px" style="margin-left:90%; ">
+          <img src="/image/contacts.png" class = "minibut" >
+            <br>
+          <h6 style="margin-left:90%">send message</h6>
+        </a>
+        <img  src="image/s2s-11.png"  alt="" class="biglogo" style="margin-top:-5%"> 
         <div class >
             <div>
               <div class="sell">
@@ -51,10 +56,11 @@
                   <p class = "text"> communicate with classmate</p>
                 </div>
               </div>
+              <br></br>
             </div>
           </div>
         </div>
-      </div>
+        
     </section>
       <body>
 
@@ -62,5 +68,6 @@
  
 <div class="footer">
 </div>
+
 
 </html>

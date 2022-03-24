@@ -34,11 +34,20 @@
     </form>
   </div>
   <ul>
-    <% rows.forEach(function(r){ %>
-      <li>
-        <%=r.bookname%> selled by <%=r.seller%> and the cover <a href = "/books/<%= r.id %>"><img alt="Embedded Image" src ="data:image/png;base64,<%=r.imghere%>"></a> <%=r.description%>
-      </li>
-    <% }) %>
+        <table class = "table" border = '1'>  
+     <th style="width: 10% ;">book name</th> <th>selled by</th> <th style="width: 20% ;">the cover</th> <th style="width: 150% ;">description</th> 
+    <% rows.forEach(function(r) { %> 
+        <form action="/detail" method="get"></form>
+          <tr>
+            <td> <%=r.bookname%> </td>
+            <td> <%=r.seller%> </td>
+            <td> <a class = "bookpic" href = "/books/<%= r.id %>"  ><img alt="Embedded Image" style="width : 150px; height 100px;"src ="data:image/png;base64,<%=r.imghere%>"></a> </td>
+            <td> <%=r.description%> </td>
+
+          </tr>
+    <% }); %> 
+</table>
   </ul>
   </body>
 </html>
+
