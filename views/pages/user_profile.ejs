@@ -3,7 +3,7 @@
 <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
-</head>
+    </head>
   <head>
 <link rel="stylesheet" href="stylesheets/home.css" media="screen">
     <script> 
@@ -28,9 +28,20 @@
  
       <body>
         <ul>
-          name: <%=user.uname%>  age: <%=user.age%>
-          major: <%=user.major%>  phonenumber: <%=user.phonenumber%>
-            <table class="table">
+          <h6>Name: <%=user.uname%> </h6>
+          <h6>Age: <%=user.age%></h6>  
+          <h6>Major: <%=user.major%> </h6> 
+          <h6>Phone number: <%=user.phonenumber%></h6>    
+
+          <a href= "/edit_info"  data-image-width="200px" data-image-height="200px">
+          <img src="/image/exchange.png" class = "minibut" style="margin-left:90%;" >
+            <br>
+            <h6 style="margin-left:88%;" >Edit information</h6>
+        </a>
+
+            
+          </form>
+          <table class="table">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -57,6 +68,5 @@
               </tbody>
             </table>
         </ul>
-        <!-- databse加入性别，age，major, phone number -->
   </body>
 </html>
