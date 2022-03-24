@@ -1,41 +1,56 @@
-var chai = require('chai');
-var chaiHttp = require('chai-http');
-var server = require('../index')
 
+var chai = require('chai')
+var chaihttp = require('chai-http')
+var server = require('../index.js')
 var should = chai.should();
 
-chai.use(chaiHttp);
-
-describe('Users Test', function() {
-  
-    it('should list ALL users on /users-api GET', function(done){
-        chai.request(server).post('/register').send({'name': 'test', 'Useraccount': 'lalala', 'password': 'hahaha', 'Confirmpassword': 'hahaha'}).end(function(err,res){
-        res.should.have.status(201);
-        //res.should.be.json;
-        done();
-      });
-    });
-    // it('should add a SINGLE user on /users-api POST', function(done){
-    //   chai.request(server).get('/users-api').end(function(err,res){
-    //     var num_users0 = res.body.length;
-  
-    //     chai.request(server).post('/users-api').send({'fname':'tester','lname':'mctesty','age':'23'})
-    //       .end(function(err,res){
-    //         var num_users = res.body.length;
-  
-    //         (num_users-num_users0).should.equal(1);
-    //         res.should.have.status(200);
-    //         res.should.be.json;
-    //         res.body.should.be.a('array');
-    //         res.body[0].fname.should.equal('tester');
-    //         res.body[0].lname.should.equal('mctesty');
-    //         done();
-    //       });
-  
-    //  });
-  
-    //});
-  
-  });
-  
-
+chai.use(chaihttp)
+describe('Users',function(){
+    //all the test relate to the user
+    it('should add a single user on post successful request for /register', function(done){
+        chai.request(server).post('/register').send({'name':'test', 'Useraccount':'test', 'password':'123', 'Confirmpassword':'123'})
+            .end(function(error,res){
+                res.should.have.status(200)
+                //  res.body.name.should.equal('test')
+                //  res.body.Useraccount.should.equal('test')
+                //  res.body.password.should.equal('123')
+                //  res.body.Confirmpassword.should.equal('123')
+                done()
+            })
+    })
+    it('should add a single user on post failure request for /register', function(done){
+        chai.request(server).post('/register').send({'name':'test', 'Useraccount':'test', 'password':'123', 'Confirmpassword':'321'})
+            .end(function(error,res){
+                res.should.have.status(400)
+        done()
+         })
+    })
+    it('should add a single user on post failure request for /addbook', function(done){
+        chai.request(server).post('/addbook').send({'Bookname':'test', 'Author':'test', 'Pages':'123', 'date':'03/24/2022','Language':'eng','Course':'test','Price':'10'})
+            .end(function(error,res){
+                res.should.have.status(400)
+        done()
+         })
+    })
+    it('should add a single user on post successful request for /login', function(done){
+        chai.request(server).post('/logindata').send({'Useraccount':'test', 'password':'123'})
+            .end(function(error,res){
+                res.should.have.status(200)
+        done()
+         })
+    })
+    it('should add a single user on post failure request for /login', function(done){
+        chai.request(server).post('/logindata').send({'Useraccount':'test', 'password':'12345'})
+            .end(function(error,res){
+                res.should.have.status(400)
+            done()
+         })
+    })
+    it('should add a single user on post failure request for /login', function(done){
+        chai.request(server).post('/logindata').send({'Useraccount':'test123', 'password':'12345'})
+            .end(function(error,res){
+                res.should.have.status(404)
+            done()
+         })
+    })
+})
