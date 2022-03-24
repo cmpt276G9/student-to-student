@@ -10,8 +10,8 @@ const { connect } = require('http2');
 const multer = require('multer');
 const { memoryStorage } = require('multer');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL|| 
-    "postgres://postgres:@localhost/s2s"
+  connectionString: process.env.DATABASE_URL || 
+  "postgres://postgres:@localhost/s2s"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -64,6 +64,7 @@ const app = express()
     if(req.session.loggedin){
       //console.log(req.session.user)
       //console.log("coming in session")
+
       res.redirect('/dashboard')
     }
     else{
@@ -80,8 +81,36 @@ const app = express()
     },
   })
   const upload = multer({storage:multer.memoryStorage()})
+  app.get('/edit_info', (req, res) => res.render('pages/edit_info'))
+  app.post('/updateinfo',async(req,res) =>{
+    const id = req.session.user.id
+    var uage=req.body.age
+    var umajor=req.body.major
+    var uphonenumber=req.body.phonenumber
+    pool.query(`UPDATE userprof SET age = '${uage}' ,major = '${umajor}',phonenumber = '${uphonenumber}' WHERE id = '${id}';`,async(error,result)=>
+    {
+      res.render('pages/updateinfo', result);
+    })
+  })
   app.get('/register', (req, res) => res.render('pages/register'))
-  app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
+  app.get('/user_profile', (req, res) =>{
+    console.log('get user profile!!!')
+    const id = req.session.user.id
+    let user
+    let books 
+    pool
+      .query(`SELECT * FROM userprof where id = '${id}'`)
+      .then((res) => {
+        user = res.rows[0]
+      })
+      .then(() => {
+        return pool.query(`SELECT * FROM books where seller = '${user.uname}'`)
+      })
+      .then((result) => {
+        books = result.rows
+        res.render('pages/user_profile', {user, books})
+      })
+  })
   app.get('/findbook', (req, res) =>{
     pool.query(`SELECT * FROM books`,(error,result)=>{
       if(error)
@@ -91,8 +120,10 @@ const app = express()
     })
   })
   app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
+  app.get('/edit_info',(req, res) => res.render('pages/edit_info'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
   app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/manage_user', (req,res) =>res.render('pages/msg_sending'))
   app.post('/msgstoring', (req,res) =>{
     if(!req.session.loggedin){
       res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
@@ -134,7 +165,7 @@ const app = express()
       if(req.session.user.role == 0){
         //console.log("entering manager dashboard");
         var dataset = {useraccount: req.session.user.useraccount, 
-          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role};
+          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role };
         res.render('pages/manager_dashboard', dataset);
       }
       else
@@ -171,7 +202,7 @@ const app = express()
             }
             else{//password matches:
               //check if login user is a manager: future feature
-              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role};
+              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role , id : r.id};
               req.session.loggedin = true;
               req.session.user = user;
               if(r.role == 1)
@@ -182,6 +213,7 @@ const app = express()
               }
               else
               {
+                req.session.user.role = 0;
                 res.redirect("/manager_dashboard")
               }
             }
@@ -311,11 +343,11 @@ const app = express()
     }
     else{
       image = req.file.buffer.toString('base64')
-      var userdata = {name: req.session.user.name};
       // 要不要检测是否为重复的书？（应该不用)
-      // 这里的seller，上架日期，描述，暂时没加进去
+      // 这里的上架日期暂时没加进去
       //seller有一些瑕疵...
-      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,userdata,bookdata.date,
+      // 这里需要把传进去的user name改成id，然后用join
+      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
         bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
           if(err)
             throw err

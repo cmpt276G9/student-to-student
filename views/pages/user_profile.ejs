@@ -3,7 +3,7 @@
 <head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
-</head>
+    </head>
   <head>
 <link rel="stylesheet" href="stylesheets/home.css" media="screen">
     <script> 
@@ -20,17 +20,53 @@
             <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
             <select onchange="window.location=this.value;">
             <option>Hi!</option>
-            <option value="/user_profile">Your account</option>
+            <option value="/user_profile ">Your account</option>
             <option value="/#">Logout</option> 
             </select>
             </ul>
         </header>
  
       <body>
-        <h5>  user_profile  name... age ///</h5>
-</body>
- 
-<div class="footer">
-</div>
+        <ul>
+          <h6>Name: <%=user.uname%> </h6>
+          <h6>Age: <%=user.age%></h6>  
+          <h6>Major: <%=user.major%> </h6> 
+          <h6>Phone number: <%=user.phonenumber%></h6>    
 
+          <a href= "/edit_info"  data-image-width="200px" data-image-height="200px">
+          <img src="/image/exchange.png" class = "minibut" style="margin-left:90%;" >
+            <br>
+            <h6 style="margin-left:88%;" >Edit information</h6>
+        </a>
+
+            
+          </form>
+          <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Bookname</th>
+                  <th scope="col">author</th>
+                  <th scope="col">publishdate</th>
+                  <th scope="col">language</th>
+                  <th scope="col">course</th>
+                  <th scope="col">price</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                    <% books.forEach(function(r){ %>
+                    <td><%= r.id %></td>
+                    <td><%= r.bookname %></td>
+                    <td><%= r.author %></td>
+                    <td><%= r.publishdate %></td>
+                    <td><%= r.language %></td>
+                    <td><%= r.course %></td>
+                    <td><%= r.price %></td>
+                  </tr>
+               <% }) %>
+              </tbody>
+            </table>
+        </ul>
+  </body>
 </html>
