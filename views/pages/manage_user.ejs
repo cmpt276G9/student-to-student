@@ -25,7 +25,53 @@
         </header>
       <section>
       <div>
-        hhhhhhhhhh
+        <table > 
+          <tr>
+              <th>uid</th>
+              <th>user account</th>
+              <th>user name</th>
+              <th>gender</th>
+              <th>major</th>
+            </tr>
+          <% info.forEach(function(r) { %>
+            <tr>  
+              <td>
+                <%= r.id %>
+              </td> 
+              <td>
+                <%= r.useraccount %>
+              </td> 
+              <td>
+                <%= r.uname %></a>
+              </td> 
+              <td>
+                <%= r.gender %>
+              </td>
+              <td>
+                <%= r.major %>
+              </td>
+            </tr>
+            <% }); %>
+            </table>
+        <!-- <div name = "insertrow", class = "insertionform">
+          <h2>To insert new Rectangle, please fill in information below.</h2>
+          <form action = "/addnewrow", method ="post">
+            <input type="text" name="uname" placeholder="NAME"> <br>
+            <input type="text" name="color" placeholder="color"> <br>
+            <input type="number" name = "width" placeholder="width"><br>
+            <input type="number" name = "height" placeholder="height"><br>
+            <br>
+            <input type="submit">
+        
+          </form>
+        </div>
+        <div class = "deleteForm">
+          <h2>to delete any row, please fill in its uid and click delete</h2>
+          <form action = "/deleterow", method = "post">
+            <input type = "text" name = "id" placeholder="UID"><br>
+            <br>
+            <input type = "submit">
+          </form> -->
         </div>
     </section>
       <body>

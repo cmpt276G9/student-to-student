@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const session = require("express-session")
 const cookieParser = require("cookie-parser");
+var cors = require("cors")
 const PORT = process.env.PORT || 5000 
 
 const { Pool } = require('pg');
@@ -27,6 +28,8 @@ const app = express()
   maxAge: 30 * 60 * 1000 // 30 minutes
 
   }))
+  app.use("/", cors())
+  app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(express.static(path.join(__dirname, 'public')))
   app.set('views', path.join(__dirname, 'views')) 
@@ -123,7 +126,59 @@ const app = express()
   app.get('/edit_info',(req, res) => res.render('pages/edit_info'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
   app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
-  app.get('/manage_user', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/manage_user', (req,res)=>{
+    if(req.session.loggedin){
+      if(req.session.user.role == 0){
+        var query = `SELECT * from userprof`;
+        pool.query(query, async(error, result)=>{
+          if(error){
+            res.status(404);
+            res.end(error);
+          }
+          else{
+            res.status(200);
+            var data = {info: result.rows};
+            res.render('pages/manage_user', data);
+          }
+        })
+      }
+      else{ 
+        res.status(401).send(`You do not have permission to view this page, <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+      }
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
+  app.get('/manage_book',(req,res)=>{
+    if(req.session.loggedin){
+      if(req.session.user.role == 0){
+        pool.query(`SELECT * FROM books`,(error,result)=>{
+          if(error)
+          res.end(error)
+        var results = {'rows': result.rows}
+        res.render('pages/manage_book',results)
+        })
+      }
+      else{ 
+        res.status(401).send(`You do not have permission to view this page, <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+      }
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
+  app.post('/deletebook', (req,res)=>{
+    var bookid = req.body.bid;
+    pool.query(`delete from books where id = ${bookid}`, (err, result)=>{
+      if(err){
+        res.status(404).send('cannot find book id');
+      }
+      else{
+        res.send(`delete success <a href=\'/manager_dashboard'>click to go back to main page</a>`)
+      }
+    })
+  })
   app.post('/msgstoring', (req,res) =>{
     if(!req.session.loggedin){
       res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
@@ -156,6 +211,7 @@ const app = express()
       res.render('pages/dashboard', dataset);
     }
     else{
+      
       res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     res.end()
@@ -265,10 +321,6 @@ const app = express()
     {
       return res.status(400).send('missing Useraccount')
     }
-     if(!data.Useraccount)
-     {
-       return res.status(400).send('missing Useraccount')
-     }
     if(!data.password)
     {
       return res.status(400).send('missing password')
