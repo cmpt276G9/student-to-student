@@ -93,22 +93,22 @@ const app = express()
   app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
   app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
-  app.get('/msgstoring', (req,res) =>{
+  app.post('/msgstoring', (req,res) =>{
     if(!req.session.loggedin){
       res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     else{
       var uac = req.session.user.useraccount;
-      var storequery = `UPDATE userprof SET msgsent = '${req.msgbar}' where useraccount = ${uac}`;
-      var replacequery = `UPDATE userprof SET msgrec = '${req.msgbar}' where useraccount = ${req.uaccount}`
-      pool.query(storequery, async(err,res) =>{
-        if(error){
-          res.status(400).send('Unable to send')
+      var storequery = `UPDATE userprof SET msgsent = '${req.body.msgbar}' where useraccount = '${uac}'`;
+      var replacequery = `UPDATE userprof SET msgrec = '${req.body.msgbar}' where useraccount = '${req.body.uaccount}'`
+      pool.query(storequery, async(err,resu) =>{
+        if(err){
+          res.end(err)
         }
         else{
-          pool.query(replacequery, async(err,res)=>{
-            if(err){
-              res.status(400).send('unable to recieve, probably no such user exist');
+          pool.query(replacequery, async(error,results)=>{
+            if(error){
+              res.end(error);
             }
             else{
               res.send(`sending successful. <a href =\ '/dashboard'>click here</a> to go back to your main page`)
