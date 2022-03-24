@@ -67,8 +67,12 @@ const app = express()
     if(req.session.loggedin){
       //console.log(req.session.user)
       //console.log("coming in session")
-
-      res.redirect('/dashboard')
+      if(req.session.user.role == 0){
+        res.redirect('/manager_dashboard');
+      }
+      else{
+        res.redirect('/dashboard');
+      }
     }
     else{
       res.render('pages/login')
