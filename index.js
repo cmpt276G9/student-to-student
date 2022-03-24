@@ -128,9 +128,11 @@ const app = express()
       if(req.session.user.role == 0)
         res.render('pages/manager_dashboard');
       else
+        res.status(401)
         res.send('You do not have permission to view this page')
       }
       else{
+        res.status(401)
         res.send('Please login to view this page!')
       }
       res.end()
@@ -149,9 +151,12 @@ const app = express()
     var userQuery = `SELECT * FROM userprof where useraccount = '${data.Useraccount}'`;
     pool.query(userQuery, async(error,results)=>{
       if(error){
-        res.status(400)
-        return res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
-        //potential improvement: print error messages under form in .ejs
+        throw error
+      }
+      if(!results.rows.length)
+      {
+        res.status(404)
+        res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
       }
       else{
           results.rows.forEach(function(r){

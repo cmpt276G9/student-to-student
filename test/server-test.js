@@ -45,4 +45,11 @@ describe('Users',function(){
             done()
          })
     })
+    it('should add a single user on post failure request for /login', function(done){
+        chai.request(server).post('/logindata').send({'Useraccount':'test123', 'password':'12345'})
+            .end(function(error,res){
+                res.should.have.status(404)
+            done()
+         })
+    })
 })
