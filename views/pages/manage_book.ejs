@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+    </head>
+  <head>
+<link rel="stylesheet" href="stylesheets/home.css" media="screen">
+    <script> 
+    </script>
+  </head>
+  <body class = "back"><header class = "wit"><div>
+        <a href="/#"  data-image-width="200" data-image-height="200">
+          <img src="image/s2s2.png" class = "logo">
+        </a>
+        </div>
+        <br></br>
+            <ul class = "top"><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+            <select onchange="window.location=this.value;">
+            <option>Hi! </option>
+            <option value="/user_profile">Your account</option>
+            <option value="/logout">Logout</option> 
+            </select>
+            </ul>
+        </header>
+      <section>
+      <div>
+        <table > 
+          <tr>
+              <th>book id</th>
+              <th>book name</th>
+              <th>author</th>
+              <th>seller</th>
+              <th>course</th>
+              <th>price</th>
+            </tr>
+          <% rows.forEach(function(r) { %>
+            <tr>  
+              <td>
+                <%= r.id %>
+              </td> 
+              <td>
+                <%= r.bookname %>
+              </td> 
+              <td>
+                <%= r.author %></a>
+              </td> 
+              <td>
+                <%= r.seller %>
+              </td>
+              <td>
+                <%= r.course %>
+              </td>
+              <td>
+                <%= r.price %>
+              </td>
+            </tr>
+            <% }); %>
+            </table>
+        <!-- <div name = "insertrow", class = "insertionform">
+          <h2>To insert new Rectangle, please fill in information below.</h2>
+          <form action = "/addnewrow", method ="post">
+            <input type="text" name="uname" placeholder="NAME"> <br>
+            <input type="text" name="color" placeholder="color"> <br>
+            <input type="number" name = "width" placeholder="width"><br>
+            <input type="number" name = "height" placeholder="height"><br>
+            <br>
+            <input type="submit">
+        
+          </form>
+        </div> -->
+        <div class = "deleteForm">
+          <h2>to delete any row, please fill in its book id and click delete</h2>
+          <form action = "/deletebook", method = "post">
+            <input type = "text" name = "bid" placeholder="BOOK ID"><br>
+            <br>
+            <input type = "submit">
+          </form> 
+        </div>
+    </section>
+      <body>
+
+</body>
+ 
+<div class="footer">
+</div>
+
+
+</html>
