@@ -4,13 +4,14 @@ const path = require('path')
 const session = require("express-session")
 const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT || 5000 
+
 const { Pool } = require('pg');
 const { connect } = require('http2');
 const multer = require('multer');
 const { memoryStorage } = require('multer');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:2123257@localhost/login"
+  "postgres://postgres:1234@localhost/postgres"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -69,6 +70,7 @@ const app = express()
     }
     res.render('pages/login')
   })
+
   const filestorage = multer.diskStorage({
     destination: (req,file, cb) =>{
       cb(null,"./public/image")
@@ -77,20 +79,45 @@ const app = express()
       cb(null,Date.now() + "--" + file.originalname)
     },
   })
-  // const upload = multer({storage:filestorage})
   const upload = multer({storage:multer.memoryStorage()})
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
   app.get('/findbook', (req, res) =>{
-      pool.query(`SELECT * FROM books`,(error,result)=>{
-        if(error)
-          res.end(error)
-        var results = {'rows': result.rows}
-        res.render('pages/findbook',results)
-      })
+    pool.query(`SELECT * FROM books`,(error,result)=>{
+      if(error)
+        res.end(error)
+      var results = {'rows': result.rows}
+      res.render('pages/findbook',results)
     })
+  })
   app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
+  app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/msgstoring', (req,res) =>{
+    if(!req.session.loggedin){
+      res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+    else{
+      var uac = req.session.user.useraccount;
+      var storequery = `UPDATE userprof SET msgsent = '${req.msgbar}' where useraccount = ${uac}`;
+      var replacequery = `UPDATE userprof SET msgrec = '${req.msgbar}' where useraccount = ${req.uaccount}`
+      pool.query(storequery, async(err,res) =>{
+        if(error){
+          res.status(400).send('Unable to send')
+        }
+        else{
+          pool.query(replacequery, async(err,res)=>{
+            if(err){
+              res.status(400).send('unable to recieve, probably no such user exist');
+            }
+            else{
+              res.send(`sending successful. <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+            }
+          })
+        }
+      })
+    }
+  })
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
@@ -98,7 +125,7 @@ const app = express()
       res.render('pages/dashboard', dataset);
     }
     else{
-      res.send('Please login to view this page!')
+      res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     res.end()
   })
@@ -159,6 +186,30 @@ const app = express()
       }
     })
   })
+  // app.post('/auth', function(req, res) {
+  //   const userdata = req.body
+  //   if (userdata.Useraccount && userdata.password) {
+  //     // Execute SQL query that'll select the account from the database based on the specified username and password
+  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
+  //       // If there is an issue with the query, output the error
+  //       if (error) {throw error}
+  //       // If the account exists
+  //       if (results.length > 0) {
+  //         // Authenticate the user
+  //         req.session.loggedin = true;
+  //         req.session.username = username;
+  //         // Redirect to home page
+  //         res.redirect('/home');
+  //       } else {
+  //         res.send('Incorrect Username and/or Password!');
+  //       }			
+  //       res.end();
+  //     });
+  //   } else {
+  //     res.send('Please enter Username and Password!');
+  //     res.end();
+  //   }
+  // })
   app.get("/logout", function(req, res) {
     req.session.destroy(err => {
       if (err) {
@@ -220,6 +271,7 @@ const app = express()
        })
    }
   })
+
   app.post('/addbook', upload.single('bookCover'),(req,res)=>{
     const bookdata = req.body
     if(!bookdata.Bookname)
@@ -269,4 +321,5 @@ const app = express()
         })
     }
   })
+
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))

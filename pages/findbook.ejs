@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+    </head>
+  <head>
+<link rel="stylesheet" href="stylesheets/home.css" media="screen">
+<link rel="stylesheet" href="stylesheets/sellbook.css" media="screen">
+    <script> 
+    </script>
+    
+  </head>
+  <body class = "back"><header class = "wit"><div>
+        <a href="/#"  data-image-width="200" data-image-height="200">
+          <img src="image/s2s2.png" class = "logo">
+        </a>
+        </div>
+        <br></br>
+            <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+            <select onchange="window.location=this.value;">
+            <option>Hi! </option>
+            <option value="/user_profile">Your account</option>
+            <option value="/logout">Logout</option> 
+            </select>
+            </ul>
+        </header>
+              <div>
+              <img  src="image/s2s-11.png"  alt="" class="biglogo">
+          </div>
+        <div></><form action="/detail" method="get" class = "search">
+          search (title) <input type="text" name="bnames" /> 
+            <input  type="submit" name="search" value = "search"/>
+    </form>
+  </div>
+  <ul>
+        <table class = "table" border = '1'>  
+     <th style="width: 10% ;">book name</th> <th>selled by</th> <th style="width: 20% ;">the cover</th> <th style="width: 150% ;">description</th> 
+    <% rows.forEach(function(r) { %> 
+        <form action="/detail" method="get"></form>
+          <tr>
+            <td> <%=r.bookname%> </td>
+            <td> <%=r.seller%> </td>
+            <td> <a class = "bookpic" href = "/books/<%= r.id %>"  ><img alt="Embedded Image" style="width : 150px; height 100px;"src ="data:image/png;base64,<%=r.imghere%>"></a> </td>
+            <td> <%=r.description%> </td>
+
+          </tr>
+    <% }); %> 
+</table>
+  </ul>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head >
+  <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+    </head>
+  </meta>
+  <head>
+<link rel="stylesheet" href="../stylesheets/home.css" media="screen">
+<link rel="stylesheet" href="../stylesheets/sellbook.css" media="screen">
+    <script> 
+    </script>
+</head>
+
+<body class = "back"><header class = "wit"><div>
+        <a href="/#"  data-image-width="200" data-image-height="200">
+          <img src="../image/s2s2.png" class = "logo">
+        </a>
+        </div>
+        <br></br>
+            <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+            <select onchange="window.location=this.value;">
+            <option>Hi! </option>
+            <option value="/user_profile">Your account</option>
+            <option value="/logout">Logout</option> 
+            </select>
+            </ul>
+        </header>
+
+          <table class="tableee">
+    <% data.forEach(function(r){ %> 
+    <thead>
+         
+        <a class = "bookpic" href = "/books/<%= r.id %>"  ><img alt="Embedded Image" style="width : 250px; height : 300px;   float:left; text-align:left;"src ="data:image/png;base64,<%=r.imghere%>"></a> 
+        
+      
+        </table>
+        <table style="margin-right: 2%">
+        <tr>
+        <th scope="col" style="margin-right: 5%">#</th>
+        <td><%= r.id %></td>
+        
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr >
+        <th scope="col">Bookname</th>
+      <td><%= r.bookname %></td>
+      </tr>
+        <tr>
+          <th scope="col">author</th>
+          <td><%= r.author %></td>
+        </tr>
+        </table>
+        <a href= "../message_sending"  data-image-width="200px" data-image-height="200px">
+          <img src="../image/contacts.png" class = "minibut" >
+            <br>
+            contact with seller
+        </a>
+        <br><br><br></br>
+        <hr></hr>
+        <h4>Product details</h4>
+        <table class="table">
+        <tr>
+          <th scope="col">pages</th>
+          <td><%= r.pages %></td>
+        </tr>
+        <tr>
+          <th scope="col">seller</th>
+          <td><%= r.seller %></td>
+        </tr>
+
+        <tr>
+          <th scope="col">publishdate</th>
+          <td><%= r.publishdate %></td>
+        </tr>
+
+        <tr>
+          <th scope="col">language</th>
+          <td><%= r.language %></td>
+        </tr>
+
+        <tr>
+          <th scope="col">course</th>
+          <td><%= r.course %></td>
+        </tr>
+
+        <tr>
+          <th scope="col">price</th>
+          <td><%= r.price %></td>
+        </tr>
+
+        <tr>
+          <th scope="col">description</th>
+          <td><%= r.description %></td>
+        </tr>
+     <% }) %>
+    </tbody>
+  </table>
+<hr></hr>
+
+<br>
+<a href= "../findbook"  data-image-width="50px" data-image-height="50px">
+          <img src="../image/back-button.png" class = "minibut" >
+           <br>
+          back to findbook
+        </a>
+</body>
+ 
+<div class="footer">
+</div>
+</html>
