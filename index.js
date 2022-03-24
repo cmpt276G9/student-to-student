@@ -10,6 +10,7 @@ const { Pool } = require('pg');
 const { connect } = require('http2');
 const multer = require('multer');
 const { memoryStorage } = require('multer');
+var cors = require('cors')
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
   "postgres://postgres:@localhost/s2s"
@@ -32,6 +33,8 @@ const app = express()
   app.use(express.json())
   app.use(express.urlencoded({ extended: false }))
   app.use(express.static(path.join(__dirname, 'public')))
+  app.use(express.json())
+  app.use("/",cors())
   app.set('views', path.join(__dirname, 'views')) 
   app.set('view engine', 'ejs')
   app.get('/', (req, res) => res.render('pages/index'))
@@ -229,11 +232,13 @@ const app = express()
         res.render('pages/manager_dashboard', dataset);
       }
       else
+        res.status(401)
         res.send('You do not have permission to view this page')
-    }
-    else{
-      res.send('Please login to view this page!')
-    }
+      }
+      else{
+        res.status(401)
+        res.send('Please login to view this page!')
+      }
       res.end()
   })
   app.post('/logindata' , (req, res) => {
@@ -250,14 +255,19 @@ const app = express()
     var userQuery = `SELECT * FROM userprof where useraccount = '${data.Useraccount}'`;
     pool.query(userQuery, async(error,results)=>{
       if(error){
-        return res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
-        //potential improvement: print error messages under form in .ejs
+        throw error
+      }
+      if(!results.rows.length)
+      {
+        res.status(404)
+        res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
       }
       else{
           results.rows.forEach(function(r){
             //check password matches:
             if(r.password != data.password)
             {
+              res.status(400)
               res.send(`invalid password, <a href=\'/login'>click to go back to login page</a>`);
             }
             else{//password matches:
@@ -355,7 +365,6 @@ const app = express()
              {
                throw err
              }
-             res.status(201)
              res.redirect("/")
            })
          }
@@ -401,7 +410,6 @@ const app = express()
       image = req.file.buffer.toString('base64')
       // 要不要检测是否为重复的书？（应该不用)
       // 这里的上架日期暂时没加进去
-      //seller有一些瑕疵...
       // 这里需要把传进去的user name改成id，然后用join
       pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
         bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
@@ -412,5 +420,6 @@ const app = express()
         })
     }
   })
-
+  module.exports = app
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
+  //workflow：每一步用户的行为都会有反馈
