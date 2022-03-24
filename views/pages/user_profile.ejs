@@ -20,17 +20,43 @@
             <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
             <select onchange="window.location=this.value;">
             <option>Hi!</option>
-            <option value="/user_profile">Your account</option>
+            <option value="/user_profile ">Your account</option>
             <option value="/#">Logout</option> 
             </select>
             </ul>
         </header>
  
       <body>
-        <h5>  user_profile  name... age ///</h5>
-</body>
- 
-<div class="footer">
-</div>
-
+        <ul>
+          name: <%=user.uname%>  age: <%=user.age%>
+          major: <%=user.major%>  phonenumber: <%=user.phonenumber%>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Bookname</th>
+                  <th scope="col">author</th>
+                  <th scope="col">publishdate</th>
+                  <th scope="col">language</th>
+                  <th scope="col">course</th>
+                  <th scope="col">price</th>
+                </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                    <% books.forEach(function(r){ %>
+                    <td><%= r.id %></td>
+                    <td><%= r.bookname %></td>
+                    <td><%= r.author %></td>
+                    <td><%= r.publishdate %></td>
+                    <td><%= r.language %></td>
+                    <td><%= r.course %></td>
+                    <td><%= r.price %></td>
+                  </tr>
+               <% }) %>
+              </tbody>
+            </table>
+        </ul>
+        <!-- databse加入性别，age，major, phone number -->
+  </body>
 </html>
