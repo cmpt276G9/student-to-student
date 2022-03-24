@@ -10,8 +10,8 @@ const { connect } = require('http2');
 const multer = require('multer');
 const { memoryStorage } = require('multer');
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL|| 
-    "postgres://postgres:@localhost/s2s"
+  connectionString: process.env.DATABASE_URL || 
+  "postgres://postgres:1234@localhost/postgres"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -34,6 +34,21 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+    const startindex = (page-1)* limit
+    const endindex = page*limit
+    const results = {}
+    results.next ={
+      page: page+1,
+      limit: limit
+    }
+    if(startindex >0){
+      results.previous ={
+        page: page-1,
+        limit: limit
+      }
+    }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
@@ -49,6 +64,7 @@ const app = express()
     if(req.session.loggedin){
       //console.log(req.session.user)
       //console.log("coming in session")
+
       res.redirect('/dashboard')
     }
     else{
@@ -65,6 +81,17 @@ const app = express()
     },
   })
   const upload = multer({storage:multer.memoryStorage()})
+  app.get('/edit_info', (req, res) => res.render('pages/edit_info'))
+  app.post('/updateinfo',async(req,res) =>{
+    const id = req.session.user.id
+    var uage=req.body.age
+    var umajor=req.body.major
+    var uphonenumber=req.body.phonenumber
+    pool.query(`UPDATE userprof SET age = '${uage}' ,major = '${umajor}',phonenumber = '${uphonenumber}' WHERE id = '${id}';`,async(error,result)=>
+    {
+      res.render('pages/updateinfo', result);
+    })
+  })
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) =>{
     console.log('get user profile!!!')
@@ -85,34 +112,18 @@ const app = express()
       })
   })
   app.get('/findbook', (req, res) =>{
-
-    const page = parseInt(req.query.page)
-    const limit = parseInt(req.query.limit)
-    const startindex = (page-1)* limit
-    const endindex = page*limit
-    const results = {}
-    results.next ={
-      page: page+1,
-      limit: limit
-    }
-    if(startindex >0){
-      results.previous ={
-        page: page-1,
-        limit: limit
-      }
-    }
-    //SELECT * FROM books ORDER BY books.name LIMIT 10 OFFSET 10*page
-      pool.query(`SELECT * FROM books`,(error,result)=>{
-        if(error)
-          res.end(error)
-        var results = {'rows': result.rows}
-        res.render('pages/findbook',results)
-      })
+    pool.query(`SELECT * FROM books`,(error,result)=>{
+      if(error)
+        res.end(error)
+      var results = {'rows': result.rows}
+      res.render('pages/findbook',results)
     })
   })
   app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
+  app.get('/edit_info',(req, res) => res.render('pages/edit_info'))
   app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
-  app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/message_sending', (req,res) =>res.render('pages/manage_user'))
+  app.get('/manage_user', (req,res) =>res.render('pages/msg_sending'))
   app.get('/msgstoring', (req,res) =>{
     if(!req.session.loggedin){
       res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
@@ -141,7 +152,7 @@ const app = express()
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password, id: req.session.user.id};
+        name: req.session.user.name, password: req.session.user.password};
       res.render('pages/dashboard', dataset);
     }
     else{
@@ -154,7 +165,7 @@ const app = express()
       if(req.session.user.role == 0){
         //console.log("entering manager dashboard");
         var dataset = {useraccount: req.session.user.useraccount, 
-          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role};
+          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role };
         res.render('pages/manager_dashboard', dataset);
       }
       else
@@ -191,7 +202,7 @@ const app = express()
             }
             else{//password matches:
               //check if login user is a manager: future feature
-              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role, id : r.id};
+              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role , id : r.id};
               req.session.loggedin = true;
               req.session.user = user;
               if(r.role == 1)
@@ -202,6 +213,7 @@ const app = express()
               }
               else
               {
+                req.session.user.role = 0;
                 res.redirect("/manager_dashboard")
               }
             }
