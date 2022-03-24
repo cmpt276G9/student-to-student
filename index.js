@@ -63,11 +63,11 @@ const app = express()
     if(req.session.loggedin){
       //console.log(req.session.user)
       //console.log("coming in session")
-      var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password};
-      res.render('pages/dashboard', dataset);
+      res.redirect('/dashboard')
     }
-    res.render('pages/login')
+    else{
+      res.render('pages/login')
+    }
   })
   const filestorage = multer.diskStorage({
     destination: (req,file, cb) =>{
