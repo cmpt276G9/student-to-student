@@ -34,21 +34,6 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
-    const page = parseInt(req.query.page)
-    const limit = parseInt(req.query.limit)
-    const startindex = (page-1)* limit
-    const endindex = page*limit
-    const results = {}
-    results.next ={
-      page: page+1,
-      limit: limit
-    }
-    if(startindex >0){
-      results.previous ={
-        page: page-1,
-        limit: limit
-      }
-    }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
@@ -81,13 +66,48 @@ const app = express()
   })
   const upload = multer({storage:multer.memoryStorage()})
   app.get('/register', (req, res) => res.render('pages/register'))
-  app.get('/user_profile', (req, res) => res.render('pages/user_profile'))
+  app.get('/user_profile', (req, res) =>{
+    console.log('get user profile!!!')
+    const id = req.session.user.id
+    let user
+    let books 
+    pool
+      .query(`SELECT * FROM userprof where id = '${id}'`)
+      .then((res) => {
+        user = res.rows[0]
+      })
+      .then(() => {
+        return pool.query(`SELECT * FROM books where seller = '${user.uname}'`)
+      })
+      .then((result) => {
+        books = result.rows
+        res.render('pages/user_profile', {user, books})
+      })
+  })
   app.get('/findbook', (req, res) =>{
-    pool.query(`SELECT * FROM books`,(error,result)=>{
-      if(error)
-        res.end(error)
-      var results = {'rows': result.rows}
-      res.render('pages/findbook',results)
+
+    const page = parseInt(req.query.page)
+    const limit = parseInt(req.query.limit)
+    const startindex = (page-1)* limit
+    const endindex = page*limit
+    const results = {}
+    results.next ={
+      page: page+1,
+      limit: limit
+    }
+    if(startindex >0){
+      results.previous ={
+        page: page-1,
+        limit: limit
+      }
+    }
+    //SELECT * FROM books ORDER BY books.name LIMIT 10 OFFSET 10*page
+      pool.query(`SELECT * FROM books`,(error,result)=>{
+        if(error)
+          res.end(error)
+        var results = {'rows': result.rows}
+        res.render('pages/findbook',results)
+      })
     })
   })
   app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
@@ -121,7 +141,7 @@ const app = express()
   app.get('/dashboard',async(req, res) =>{ 
     if(req.session.loggedin){
       var dataset = {useraccount: req.session.user.useraccount, 
-        name: req.session.user.name, password: req.session.user.password};
+        name: req.session.user.name, password: req.session.user.password, id: req.session.user.id};
       res.render('pages/dashboard', dataset);
     }
     else{
@@ -171,7 +191,7 @@ const app = express()
             }
             else{//password matches:
               //check if login user is a manager: future feature
-              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role};
+              var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role, id : r.id};
               req.session.loggedin = true;
               req.session.user = user;
               if(r.role == 1)
@@ -311,11 +331,11 @@ const app = express()
     }
     else{
       image = req.file.buffer.toString('base64')
-      var userdata = {name: req.session.user.name};
       // 要不要检测是否为重复的书？（应该不用)
-      // 这里的seller，上架日期，描述，暂时没加进去
+      // 这里的上架日期暂时没加进去
       //seller有一些瑕疵...
-      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,userdata,bookdata.date,
+      // 这里需要把传进去的user name改成id，然后用join
+      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
         bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
           if(err)
             throw err
