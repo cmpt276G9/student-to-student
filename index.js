@@ -219,7 +219,7 @@ const app = express()
     }
     else{
       
-      res.send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     res.end()
   })
@@ -232,12 +232,11 @@ const app = express()
         res.render('pages/manager_dashboard', dataset);
       }
       else
-        res.status(401)
-        res.send('You do not have permission to view this page')
+        res.status(401).send('You do not have permission to view this page')
       }
       else{
-        res.status(401)
-        res.send('Please login to view this page!')
+        //res.status(401)
+        res.status(401).send('Please login to view this page!')
       }
       res.end()
   })
