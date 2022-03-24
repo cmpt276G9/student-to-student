@@ -129,16 +129,20 @@ const app = express()
     }
     res.end()
   })
-  app.get('/manager_dashboard',(req,res)=>{
+  app.get('/manager_dashboard', async(req,res)=>{
     if(req.session.loggedin){
-      if(req.session.user.role = 0)
-        res.render('/manager_dashboard');
+      if(req.session.user.role == 0){
+        //console.log("entering manager dashboard");
+        var dataset = {useraccount: req.session.user.useraccount, 
+          name: req.session.user.name, password: req.session.user.password, role: req.session.user.role};
+        res.render('pages/manager_dashboard', dataset);
+      }
       else
         res.send('You do not have permission to view this page')
-      }
-      else{
-        res.send('Please login to view this page!')
-      }
+    }
+    else{
+      res.send('Please login to view this page!')
+    }
       res.end()
   })
   app.post('/logindata' , (req, res) => {
@@ -178,7 +182,6 @@ const app = express()
               }
               else
               {
-                req.session.user.role = 0;
                 res.redirect("/manager_dashboard")
               }
             }
