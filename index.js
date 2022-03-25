@@ -91,48 +91,90 @@ const app = express()
     },
   })
   const upload = multer({storage:multer.memoryStorage()})
-  app.get('/edit_info', (req, res) => res.render('pages/edit_info'))
+  app.get('/edit_info', (req, res) => {
+    if(req.session.loggedin){
+      res.render('pages/edit_info')
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+
+  })
   app.post('/updateinfo',async(req,res) =>{
-    const id = req.session.user.id
-    var uage=req.body.age
-    var umajor=req.body.major
-    var uphonenumber=req.body.phonenumber
-    pool.query(`UPDATE userprof SET age = '${uage}' ,major = '${umajor}',phonenumber = '${uphonenumber}' WHERE id = '${id}';`,async(error,result)=>
-    {
-      res.render('pages/updateinfo', result);
-    })
+    if(req.session.loggedin){
+      const id = req.session.user.id
+      var uage=req.body.age
+      var umajor=req.body.major
+      var uphonenumber=req.body.phonenumber
+      pool.query(`UPDATE userprof SET age = '${uage}' ,major = '${umajor}',phonenumber = '${uphonenumber}' WHERE id = '${id}';`,async(error,result)=>
+      {
+        res.render('pages/updateinfo', result);
+      })
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
   })
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) =>{
-    console.log('get user profile!!!')
-    const id = req.session.user.id
-    let user
-    let books 
-    pool
-      .query(`SELECT * FROM userprof where id = '${id}'`)
-      .then((res) => {
-        user = res.rows[0]
-      })
-      .then(() => {
-        return pool.query(`SELECT * FROM books where seller = '${user.uname}'`)
-      })
-      .then((result) => {
-        books = result.rows
-        res.render('pages/user_profile', {user, books})
-      })
+    if(req.session.loggedin){
+      //console.log('get user profile!!!')
+      const id = req.session.user.id
+      let user
+      let books 
+      pool
+        .query(`SELECT * FROM userprof where id = '${id}'`)
+        .then((res) => {
+          user = res.rows[0]
+        })
+        .then(() => {
+          return pool.query(`SELECT * FROM books where seller = '${user.uname}'`)
+        })
+        .then((result) => {
+          books = result.rows
+          res.render('pages/user_profile', {user, books})
+        })
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
   })
   app.get('/findbook', (req, res) =>{
-    pool.query(`SELECT * FROM books`,(error,result)=>{
-      if(error)
-        res.end(error)
-      var results = {'rows': result.rows}
-      res.render('pages/findbook',results)
-    })
+      pool.query(`SELECT * FROM books`,(error,result)=>{
+        if(error)
+          res.end(error)
+        var results = {'rows': result.rows}
+        res.render('pages/findbook',results)
+      })
+    
   })
-  app.get('/addbooks',(req, res) => res.render('pages/addbooks'))
-  app.get('/edit_info',(req, res) => res.render('pages/edit_info'))
-  app.get('/findclassmate', (req, res) => res.render('pages/findclassmate'))
-  app.get('/message_sending', (req,res) =>res.render('pages/msg_sending'))
+  app.get('/addbooks',(req, res) => {
+    if(req.session.loggedin){
+    res.render('pages/addbooks')
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+
+  })
+  app.get('/findclassmate', (req, res) => {
+    
+    if(req.session.loggedin){
+      res.render('pages/findclassmate')
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+    
+  })
+  app.get('/message_sending', (req,res) =>{
+    if(req.session.loggedin){
+      res.render('pages/msg_sending')
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
   app.get('/manage_user', (req,res)=>{
     if(req.session.loggedin){
       if(req.session.user.role == 0){
@@ -175,16 +217,42 @@ const app = express()
       res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
   })
+  app.post('/deletebook/:bid', (req,res)=>{
+    if(req.session.loggedin){
+      var bookid = req.params.bid;
+      pool.query(`delete from books where id = ${bookid}`, (err, result)=>{
+        if(err){
+          res.status(404).send('cannot find book id');
+        }
+        else{
+          res.send(`delete success <a href=\'/dashboard'>click to go back to main page</a>`)
+        }
+      })
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
+  })
   app.post('/deletebook', (req,res)=>{
-    var bookid = req.body.bid;
-    pool.query(`delete from books where id = ${bookid}`, (err, result)=>{
-      if(err){
-        res.status(404).send('cannot find book id');
+    if(req.session.loggedin){
+      if(req.session.user.role == 0){
+      var bookid = req.body.bid;
+      pool.query(`delete from books where id = ${bookid}`, (err, result)=>{
+        if(err){
+          res.status(404).send('cannot find book id');
+        }
+        else{
+          res.send(`delete success <a href=\'/manager_dashboard'>click to go back to main page</a>`)
+        }
+      })
       }
-      else{
-        res.send(`delete success <a href=\'/manager_dashboard'>click to go back to main page</a>`)
-      }
-    })
+      else{ 
+      res.status(401).send(`You do not have permission to view this page, <a href =\ '/dashboard'>click here</a> to go back to your main page`)
+    }
+    }
+    else{
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
+    }
   })
   app.post('/msgstoring', (req,res) =>{
     if(!req.session.loggedin){
@@ -232,11 +300,11 @@ const app = express()
         res.render('pages/manager_dashboard', dataset);
       }
       else
-        res.status(401).send('You do not have permission to view this page')
+        res.status(401).send(`You do not have permission to view this page, click here to go to <a href=\'/dashboard'>home page</a>`)
       }
       else{
         //res.status(401)
-        res.status(401).send('Please login to view this page!')
+        res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
       }
       res.end()
   })
@@ -315,6 +383,7 @@ const app = express()
   //   }
   // })
   app.get("/logout", function(req, res) {
+    req.session.loggedin = false;
     req.session.destroy(err => {
       if (err) {
         res.status(400).send('Unable to log out')
@@ -372,52 +441,58 @@ const app = express()
   })
 
   app.post('/addbook', upload.single('bookCover'),(req,res)=>{
-    const bookdata = req.body
-    if(!bookdata.Bookname)
-    {
-      return res.status(400).send('missing book title')
-    }
-    if(!bookdata.Author)
-    {
-      return res.status(400).send('missing Author')
-    }
-    if(!bookdata.Pages)
-    {
-      return res.status(400).send('missing Pages')
-    }
-    if(!bookdata.date)
-    {
-      return res.status(400).send('date')
-    }
-    if(!bookdata.Language)
-    {
-      return res.status(400).send('missing Language')
-    }
-    if(!bookdata.Course)
-    {
-      return res.status(400).send('missing Course')
-    }
-    // if(!req.file)
-    // {
-    //   return res.status(400).send('missing book cover')
-    // }
-    if(!bookdata.price)
-    {
+    if(req.session.loggedin){
+      const bookdata = req.body
+      if(!bookdata.Bookname)
+      {
+        return res.status(400).send('missing book title')
+      }
+      if(!bookdata.Author)
+      {
+        return res.status(400).send('missing Author')
+      }
+      if(!bookdata.Pages)
+      {
+        return res.status(400).send('missing Pages')
+      }
+      if(!bookdata.date)
+      {
+        return res.status(400).send('date')
+      }
+      if(!bookdata.Language)
+      {
+        return res.status(400).send('missing Language')
+      }
+      if(!bookdata.Course)
+      {
+        return res.status(400).send('missing Course')
+      }
+      // if(!req.file)
+      // {
+      //   return res.status(400).send('missing book cover')
+      // }
+      if(!bookdata.price)
+      {
       return res.status(400).send('missing price')
+      }
+      else{
+        image = req.file.buffer.toString('base64')
+        // 要不要检测是否为重复的书？（应该不用)
+        // 这里的上架日期暂时没加进去
+        // 这里需要把传进去的user name改成id，然后用join
+        pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
+          bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
+            if(err)
+              throw err
+            res.status(201)
+            res.redirect("/findbook")
+          })
+      }
     }
     else{
-      image = req.file.buffer.toString('base64')
-      // 要不要检测是否为重复的书？（应该不用)
-      // 这里的上架日期暂时没加进去
-      // 这里需要把传进去的user name改成id，然后用join
-      pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
-        bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
-          if(err)
-            throw err
-          res.status(201)
-          res.redirect("/findbook")
-        })
+      res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
+
   })
   module.exports = app
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
