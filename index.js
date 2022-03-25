@@ -12,11 +12,10 @@ const multer = require('multer');
 const { memoryStorage } = require('multer');
 var cors = require('cors')
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:@localhost/s2s"
-  // ssl: {
-  //   rejectUnauthorized: false
-  // }
+  connectionString: process.env.DATABASE_URL, 
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const app = express()
