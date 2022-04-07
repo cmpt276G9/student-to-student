@@ -18,36 +18,6 @@ const pool = new Pool({
   //   rejectUnauthorized: false
   // }
 });
-function initMap() {
-  const Renderer = new google.maps.DirectionsRenderer();
-  const Service = new google.maps.DirectionsService();
-  const Vancouver = { lat: 49.246292, lng: -123.116226 };
-  const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 4,
-    center: Vancouver,
-  });
-  const marker = new google.maps.Marker({
-    position: Vancouver,
-    map: map,
-  });
-  Renderer.setMap(map)
-  calculateRoute(Service,Renderer)
-  document.getElementById("mode").addEventListener("change",()=>{
-    calculateRoute(Service,Renderer)
-  })
-}
-function calculateRoute(Service,Renderer){
-  const mode = document.getElementById("mode").value;
-  Service.route({
-    origin: document.getElementById("from").value,
-    destination: document.getElementById("to").value,
-    travelMode: google.maps.TravelMode[mode]
-  })
-  .then((response)=>{
-    Renderer.setDirections(response)
-  })
-  .catch((e)=>window.alert("request failed due to "+ status))
-}
 const app = express()
   // app.use(cookieParser());  
   app.use(session({
@@ -401,7 +371,6 @@ const app = express()
    });
   app.post('/register' , async (req, res) => {
     const data = req.body
-
     if(!data.name)
     {
       return res.status(400).send('missing name')
