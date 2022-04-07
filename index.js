@@ -39,21 +39,6 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
-    // const page = parseInt(req.query.page)
-    // const limit = parseInt(req.query.limit)
-    // const startindex = (page-1)* limit
-    // const endindex = page*limit
-    // const results = {}
-    // results.next ={
-    //   page: page+1,
-    //   limit: limit
-    // }
-    // if(startindex >0){
-    //   results.previous ={
-    //     page: page-1,
-    //     limit: limit
-    //   }
-    // }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
@@ -61,14 +46,10 @@ const app = express()
       } 
       bookdata = {data: results.rows}
       res.render('pages/bookdetail',bookdata)
-      //怎么render进去？
     })
   })
   app.get('/login', (req, res) => {
-    // console.log(req.session.user)
     if(req.session.loggedin){
-      //console.log(req.session.user)
-      //console.log("coming in session")
       if(req.session.user.role == 0){
         res.redirect('/manager_dashboard');
       }
@@ -83,14 +64,6 @@ const app = express()
   app.get('/findclassmate/map',function(req,res){
     res.sendFile(path.join(__dirname,'/map.html'))
   })
-  // const filestorage = multer.diskStorage({
-  //   destination: (req,file, cb) =>{
-  //     cb(null,"./public/image")
-  //   },
-  //   filename: (req,file,cb) =>{
-  //     cb(null,Date.now() + "--" + file.originalname)
-  //   },
-  // })
   const upload = multer({storage:multer.memoryStorage()})
   app.get('/edit_info', (req, res) => {
     if(req.session.loggedin){
@@ -119,7 +92,6 @@ const app = express()
   app.get('/register', (req, res) => res.render('pages/register'))
   app.get('/user_profile', (req, res) =>{
     if(req.session.loggedin){
-      //console.log('get user profile!!!')
       const id = req.session.user.id
       let user
       let books 
@@ -295,7 +267,6 @@ const app = express()
   app.get('/manager_dashboard', async(req,res)=>{
     if(req.session.loggedin){
       if(req.session.user.role == 0){
-        //console.log("entering manager dashboard");
         var dataset = {useraccount: req.session.user.useraccount, 
           name: req.session.user.name, password: req.session.user.password, role: req.session.user.role };
         res.render('pages/manager_dashboard', dataset);
@@ -304,22 +275,13 @@ const app = express()
         res.status(401).send(`You do not have permission to view this page, click here to go to <a href=\'/dashboard'>home page</a>`)
       }
       else{
-        //res.status(401)
         res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
       }
       res.end()
   })
   app.post('/logindata' , (req, res) => {
-    // 
-    //check if req.session has number:
-    // console.log(req.session.user)
-    // if(req.session.user){
-    //   var dataset = {useraccount: req.session.user.useraccount, 
-    //     name: req.session.user.name, password: req.session.user.password};
-    //   res.render('pages/dashboard', dataset);
-    // }
     var data = req.body;
-    //console.log(data.Useraccount);
+    let errors = []
     var userQuery = `SELECT * FROM userprof where useraccount = '${data.Useraccount}'`;
     pool.query(userQuery, async(error,results)=>{
       if(error){
@@ -328,25 +290,25 @@ const app = express()
       if(!results.rows.length)
       {
         res.status(404)
-        res.send(`invalid account, <a href=\'/login'>click to go back to login page</a>`);
+        errors.push({ message: "invalide user account!" })
+      }
+      if(errors.length >0){
+        res.render("pages/login",{ errors})
       }
       else{
           results.rows.forEach(function(r){
-            //check password matches:
             if(r.password != data.password)
             {
               res.status(400)
-              res.send(`invalid password, <a href=\'/login'>click to go back to login page</a>`);
+              errors.push({ message: "invalide password, please check your password if it is matching to your account!" })
+              res.render("pages/login",{ errors})
             }
-            else{//password matches:
-              //check if login user is a manager: future feature
+            else{
               var user = {useraccount: r.useraccount, name: r.uname, password: r.password, role : r.role , id : r.id};
               req.session.loggedin = true;
               req.session.user = user;
               if(r.role == 1)
               {
-              //console.log(req.session.user.name);
-              //if loging user is a manager, then go to manager dashboard
               res.redirect("/dashboard")
               }
               else
@@ -371,26 +333,34 @@ const app = express()
    });
   app.post('/register' , async (req, res) => {
     const data = req.body
+    let errors = []
     if(!data.name)
     {
-      return res.status(400).send('missing name')
+      res.status(400)
+      errors.push({ message: "missing name!" })
     }
     if(!data.Useraccount)
     {
-      return res.status(400).send('missing Useraccount')
+      res.status(400)
+      errors.push({ message: "missing useraccount!" })
     }
     if(!data.password)
     {
-      return res.status(400).send('missing password')
+      res.status(400)
+      errors.push({ message: "missing password!" })
     }
     if(!data.Confirmpassword)
     {
-      return res.status(400).send('missing Confirmpassword')
+      res.status(400)
+      errors.push({ message: "missing confirm password!" })
     }
-    //control password length?
     if(data.password != data.Confirmpassword)
     {
-      return res.status(400).send('different passwords') //400？
+      res.status(400)
+      errors.push({ message: "different passwords" })
+    }
+    if(errors.length >0){
+      res.render("pages/register",{ errors})
     }
     else{
       pool.query(`SELECT * FROM userprof where useraccount = $1`, [data.Useraccount],(err,results)=>{
@@ -399,7 +369,9 @@ const app = express()
         }
         if(results.rows.length)
         {
-          res.send("account is already exists.")
+          res.status(400)
+          errors.push({ message: "account already exists" })
+          res.render("pages/register",{ errors})
         }
         else{
          pool.query(
@@ -419,43 +391,47 @@ const app = express()
   app.post('/addbook', upload.single('bookCover'),(req,res)=>{
     if(req.session.loggedin){
       const bookdata = req.body
+      let errors = []
       if(!bookdata.Bookname)
       {
-        return res.status(400).send('missing book title')
+        res.status(400)
+        errors.push({ message: "missing book name!" })
       }
       if(!bookdata.Author)
       {
-        return res.status(400).send('missing Author')
+        res.status(400)
+        errors.push({ message: "missing author!" })
       }
       if(!bookdata.Pages)
       {
-        return res.status(400).send('missing Pages')
+        res.status(400)
+        errors.push({ message: "missing pages!" })
       }
       if(!bookdata.date)
       {
-        return res.status(400).send('date')
+        res.status(400)
+        errors.push({ message: "missing publish date!" })
       }
       if(!bookdata.Language)
       {
-        return res.status(400).send('missing Language')
+        res.status(400)
+        errors.push({ message: "missing language!" })
       }
       if(!bookdata.Course)
       {
-        return res.status(400).send('missing Course')
+        res.status(400)
+        errors.push({ message: "missing course!" })
       }
-      // if(!req.file)
-      // {
-      //   return res.status(400).send('missing book cover')
-      // }
       if(!bookdata.price)
       {
-      return res.status(400).send('missing price')
+        res.status(400)
+        errors.push({ message: "missing price!" })
+      }
+      if(errors.length >0){
+        res.render("pages/addbooks",{ errors})
       }
       else{
         image = req.file.buffer.toString('base64')
-        // 要不要检测是否为重复的书？（应该不用)
-        // 这里的上架日期暂时没加进去
-        // 这里需要把传进去的user name改成id，然后用join
         pool.query(`INSERT INTO books (bookname,author,pages,seller,publishdate,language,course,price,description,imghere) VALUES ($1, $2, $3,$4,$5,$6,$7,$8,$9,$10)`, [bookdata.Bookname,bookdata.Author,bookdata.Pages,req.session.user.name,bookdata.date,
           bookdata.Language,bookdata.Course, bookdata.price, bookdata.description, image],(err,results)=>{
             if(err)

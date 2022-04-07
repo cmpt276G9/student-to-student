@@ -31,6 +31,14 @@
         <br>
         <input type="submit" name = "sub" value="submit">
     </form>
+    <br>
     <div class = "te"><a href="/register">register</a></div> 
+    <ul>
+        <% if(typeof errors != 'undefined'){ %>
+            <% errors.forEach(error => { %>
+                <li><%= error.message %></li>
+            <% }) %>
+        <% } %>
+    </ul>
 </body>
 </html>

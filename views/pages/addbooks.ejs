@@ -64,8 +64,14 @@
           <br>
         </div>
             <input type="submit" name = "sub" value="sellbook">
-           
         </form>
-        
+        <br>
+        <ul>
+          <% if(typeof errors != 'undefined'){ %>
+              <% errors.forEach(error => { %>
+                  <li><%= error.message %></li>
+              <% }) %>
+          <% } %>
+      </ul>
     </div>
-       
+</html>
