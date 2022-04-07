@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map</title>
+    <style>
+      #map{
+        height: 800px;
+        margin: auto;
+      }
+    </style>
+    <script src="index.js"></script>
+  </head>
+  <body>
+    <h1>Google Map</h1>
+    <p>This map will help you find trading locations</p>
+    <form>
+      <label for="from">Your Location</label>
+      <input type="text" id ="from" placeholder="Origin">
+      <br>
+      <label for="to">Destination</label>
+      <input type="text" id ="to" placeholder="Destination">
+    </form>
+    <b>Mode of travel</b>
+    <select id = "mode">
+      <option value="DRIVING">Driving</option>
+      <option value="BICYCLING">Bicycling</option>
+      <option value="TRANSIT">Transit</option>
+      <option value="WALKING">Walking</option>
+    </select>
+    <div id="map"></div>
+    <div id = "output"></div>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_lNP7G_bJ9JDKoHEgjswbbFBIJQTadUc&callback=initMap&v=weekly"
+      async
+    ></script>
+  </body>
+</html>

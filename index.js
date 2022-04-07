@@ -12,13 +12,42 @@ const multer = require('multer');
 const { memoryStorage } = require('multer');
 var cors = require('cors')
 const pool = new Pool({
-   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-  // || "postgres://postgres:@localhost/s2s"
+  connectionString: process.env.DATABASE_URL || 
+  "postgres://postgres:2123257@localhost/login"
+  // ssl: {
+  //   rejectUnauthorized: false
+  // }
 });
-
+function initMap() {
+  const Renderer = new google.maps.DirectionsRenderer();
+  const Service = new google.maps.DirectionsService();
+  const Vancouver = { lat: 49.246292, lng: -123.116226 };
+  const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 4,
+    center: Vancouver,
+  });
+  const marker = new google.maps.Marker({
+    position: Vancouver,
+    map: map,
+  });
+  Renderer.setMap(map)
+  calculateRoute(Service,Renderer)
+  document.getElementById("mode").addEventListener("change",()=>{
+    calculateRoute(Service,Renderer)
+  })
+}
+function calculateRoute(Service,Renderer){
+  const mode = document.getElementById("mode").value;
+  Service.route({
+    origin: document.getElementById("from").value,
+    destination: document.getElementById("to").value,
+    travelMode: google.maps.TravelMode[mode]
+  })
+  .then((response)=>{
+    Renderer.setDirections(response)
+  })
+  .catch((e)=>window.alert("request failed due to "+ status))
+}
 const app = express()
   // app.use(cookieParser());  
   app.use(session({
@@ -40,21 +69,21 @@ const app = express()
   app.get('/', (req, res) => res.render('pages/index'))
   app.get('/books/:id',async(req,res)=>{
     const id = req.params.id
-    const page = parseInt(req.query.page)
-    const limit = parseInt(req.query.limit)
-    const startindex = (page-1)* limit
-    const endindex = page*limit
-    const results = {}
-    results.next ={
-      page: page+1,
-      limit: limit
-    }
-    if(startindex >0){
-      results.previous ={
-        page: page-1,
-        limit: limit
-      }
-    }
+    // const page = parseInt(req.query.page)
+    // const limit = parseInt(req.query.limit)
+    // const startindex = (page-1)* limit
+    // const endindex = page*limit
+    // const results = {}
+    // results.next ={
+    //   page: page+1,
+    //   limit: limit
+    // }
+    // if(startindex >0){
+    //   results.previous ={
+    //     page: page-1,
+    //     limit: limit
+    //   }
+    // }
     pool.query(`SELECT * FROM books where id = '${id}'`, (error,results)=>{
       if(error)
       {
@@ -81,15 +110,17 @@ const app = express()
       res.render('pages/login')
     }
   })
-
-  const filestorage = multer.diskStorage({
-    destination: (req,file, cb) =>{
-      cb(null,"./public/image")
-    },
-    filename: (req,file,cb) =>{
-      cb(null,Date.now() + "--" + file.originalname)
-    },
+  app.get('/findclassmate/map',function(req,res){
+    res.sendFile(path.join(__dirname,'/map.html'))
   })
+  // const filestorage = multer.diskStorage({
+  //   destination: (req,file, cb) =>{
+  //     cb(null,"./public/image")
+  //   },
+  //   filename: (req,file,cb) =>{
+  //     cb(null,Date.now() + "--" + file.originalname)
+  //   },
+  // })
   const upload = multer({storage:multer.memoryStorage()})
   app.get('/edit_info', (req, res) => {
     if(req.session.loggedin){
@@ -358,30 +389,6 @@ const app = express()
       }
     })
   })
-  // app.post('/auth', function(req, res) {
-  //   const userdata = req.body
-  //   if (userdata.Useraccount && userdata.password) {
-  //     // Execute SQL query that'll select the account from the database based on the specified username and password
-  //     pool.query(`SELECT * FROM userprof WHERE useraccount = '${userdata.Useraccount}' AND password = '${userdata.password}'`, (error, results)=> {
-  //       // If there is an issue with the query, output the error
-  //       if (error) {throw error}
-  //       // If the account exists
-  //       if (results.length > 0) {
-  //         // Authenticate the user
-  //         req.session.loggedin = true;
-  //         req.session.username = username;
-  //         // Redirect to home page
-  //         res.redirect('/home');
-  //       } else {
-  //         res.send('Incorrect Username and/or Password!');
-  //       }			
-  //       res.end();
-  //     });
-  //   } else {
-  //     res.send('Please enter Username and Password!');
-  //     res.end();
-  //   }
-  // })
   app.get("/logout", function(req, res) {
     req.session.loggedin = false;
     req.session.destroy(err => {

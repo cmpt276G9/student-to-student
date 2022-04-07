@@ -26,6 +26,7 @@
     "socket.io": "^4.4.1"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.48.5",
     "got": "^11.3.0",
     "tape": "^4.7.0"
   },
