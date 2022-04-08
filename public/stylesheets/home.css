@@ -1,10 +1,16 @@
 .back{
   background-color: rgb(255, 249, 163);
 }
+.wit{
+  margin-left: -1%;
+  margin-right: -1%;
+  margin-bottom: 2%;
+  margin-top: -1%;
+  background-color: rgb(255, 255, 255);
+}
 .logo{
   width: 150px;
-  height: 150px;
-  margin-top: -3%;
+  height: 90px;
 }
 .top{
   margin-top: -5%;
@@ -29,6 +35,9 @@
    height: 70px;
 }
 .biglogo{
+  text-align: center;
+  margin-top: 5%;
+  margin-bottom: -5%;
   margin-left: 43%;
 }
 .find{
@@ -60,3 +69,23 @@
 .table{
   text-align: center;
 }
+.uaccount{
+  margin-top: 50px;
+  width: 500px;
+  height: 20px;
+}
+.msgbar{
+  width: 500px;
+  height: 500px;
+}
+
+.minibut{
+  margin-left: 2%;
+  width: 50px;
+  height: 50px;
+}
+
+.tableee{
+  margin-left: 2%;
+}
+

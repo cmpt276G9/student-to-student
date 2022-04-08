@@ -2,14 +2,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
-    </head>
-  <head>
-<link rel="stylesheet" href="stylesheets/home.css" media="screen">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+    <link rel="stylesheet" href="stylesheets/home.css" media="screen">
 
-    <script> 
-    </script>
+    <script src = "/socket.io/socket.io.js"> </script>
     
   </head>
   <body class = "back"><header class = "wit"><div>
@@ -20,7 +17,8 @@
         <br></br>
             <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
             <select onchange="window.location=this.value;">
-            <option>Hi! </option>
+            <option>Hi! <div id = "username"><%= uname %></div></option>
+            
             <option value="/user_profile">Your account</option>
             <option value="/logout">Logout</option> 
             <option value="/manager_dashboard">go to manager view</option>
@@ -30,10 +28,42 @@
               <div>
               <img  src="image/s2s-11.png"  alt="" class="biglogo">
           </div>
-        
-          <form action = "/msgstoring" method = "post">
-              <input class = "uaccount" type = "text" name = "uaccount" placeholder = "user you want send to"></input><br></br>
-              <input class = "msgbar" type = "text" name = "content" placeholder = "input what you want to send"></input>
-              <input type = "submit" ></input>
+        <div id = "msg_content">
+        </div>
+        <br>
+        <div >
+          <form id = "send_bar">
+            <input id = "msg" type = "text">
+            <button type = "submit" id = "submit_msg">Send</button>
           </form>
+        </div>
+          <script>
+            const socket = io.connect();
+            
+            const msgForm = document.getElementById('send_bar');
+            const msgContent = document.getElementById('msg_content');
+            const msgInput = document.getElementById('msg');
+            const name =  prompt("please enter your nickname: ");
+            display_msg('You joined');
+            socket.emit('new_user', name);
+            socket.on('chat-msg', data=>{
+              display_msg(`${data.name}: ${data.msg}`);
+            })
+            socket.on('user', username=>{
+              display_msg(`${username} joined`)
+            })
+            msgForm.addEventListener('submit', event=>{
+              event.preventDefault()
+              const msginfo = msgInput.value;
+              display_msg(`You: ${msginfo}`);
+              socket.emit('send-msg', msginfo);
+              msgInput.value = '';
+            })
+
+            function display_msg( msg ){
+              const msgline = document.createElement('div')
+              msgline.innerText = msg;
+              msgContent.append(msgline);
+            }
+          </script>
 </body>

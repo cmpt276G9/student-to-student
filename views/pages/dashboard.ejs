@@ -1,13 +1,74 @@
 <!DOCTYPE html>
 <html>
-    <head>
+<head>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
     </head>
-<h1>
-    Hello!
-</h1>
-<body>
-    <a href="/logout">logout</a>
+  <head>
+<link rel="stylesheet" href="stylesheets/home.css" media="screen">
+    <script> 
+    </script>
+  </head>
+  <body class = "back"><header class = "wit"><div>
+        <a href="/dashboard"  data-image-width="200" data-image-height="200">
+          <img src="image/s2s2.png" class = "logo">
+        </a>
+        
+        </div>
+        <br></br>
+            <ul class = "top"><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+            <select onchange="window.location=this.value;">
+            <option>Hi! <%= name %></option>
+            <option value="/user_profile">Your account</option>
+            <option value="/logout">Logout</option> 
+            <option value="/manager_dashboard">go to manager view</option>
+            </select>
+            </ul>
+        </header>
+      <section>
+      <div>
+      <a href= "/message_sending"  data-image-width="200px" data-image-height="200px" style="margin-left:90%; ">
+          <img src="/image/contacts.png" class = "minibut" >
+            <br>
+          <h6 style="margin-left:90%">send message</h6>
+        </a>
+        <img  src="image/s2s-11.png"  alt="" class="biglogo" style="margin-top:-5%"> 
+        <div class >
+            <div>
+              <div class="sell">
+                <div ><span><img src="image/3771417.png" alt=""class= "pic"></span>
+                <br>
+                  <a href="/addbooks"  class = "text">Sell your book</a>
+                  <p class = "text"> Sell your unused used books</p>
+                </div>
+              </div>
+              <div class = "find"> 
+              <div ><span><img src="image/5434686.png" alt="" class= "pic"></span>
+                <br>
+                  <a href="/findbook" class = "text">Find your book
+                  </a>
+                  <p class = "text" > find the book you need</p>
+                </div>
+                </div>
+              <div >
+                <div class = "classmate" ><span ><img src="image/3214781.png" alt="" class= "pic"></span>
+                <br>
+                  <a href="/findclassmate" class = "text">Find classmate</a>
+                  <p class = "text"> communicate with classmate</p>
+                </div>
+              </div>
+              <br></br>
+            </div>
+          </div>
+        </div>
+        
+    </section>
+      <body>
+
 </body>
+ 
+<div class="footer">
+</div>
+
+
 </html>
