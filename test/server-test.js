@@ -81,4 +81,11 @@ describe('Users',function(){
             done()
         })
     })
+    it('should add a single user on dashboard failure (have not logged in) request for manager dashboard', function(done){
+        chai.request(server).get('/manager_dashboard')
+            .end(function(error,res){
+                res.should.have.status(401)
+            done()
+        })
+    })
 })
