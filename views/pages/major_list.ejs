@@ -7,12 +7,11 @@
   <head>
 <link rel="stylesheet" href="stylesheets/home.css" media="screen">
 <link rel="stylesheet" href="stylesheets/sellbook.css" media="screen">
-<script src="/index.js"></script>
+    <script> 
+    </script>
     
   </head>
-  <body class = "back"><header class = "wit">
-  <div>
- 
+  <body class = "back"><header class = "wit"><div>
         <a href="/dashboard"  data-image-width="200" data-image-height="200">
           <img src="image/s2s2.png" class = "logo">
         </a>
@@ -27,27 +26,25 @@
             </select>
             </ul>
         </header>
-        <div>
+              <div>
               <img  src="image/s2s-11.png"  alt="" class="biglogo">
           </div>
-        <div>
-         <p>please select major</p>
-         <form action = "/findcourse", method = "post">
-           <input list = "major_list", name = "major">
-           <datalist id = "major_list">
-            <option>CMPT</option>
-            <option>ECON</option>
-            <option>BUSI</option>
-            <option>ENVI</option>
-            <option>ARTS</option>
-            <option>ENSC</option>
-            <option>PSYC</option>
-            <option>STAT</option>
-          </datalist>
-          <input type = "submit">
-         </form>
-        </div>
-            <br>
-            <a href="/findclassmate/map">show map</a>
-    </body>
+        <div><form action="/detail" method="get" class = "search">
+          
+    </form>
+  </div>
+  <ul>
+        <table class = "table" border = '1'>  
+     <th style="width: 10% ;">major name</th> <th>name</th> <th style="width: 20% ;">userid</th> <th style="width: 150% ;">phone number</th> 
+    <% rows.forEach(function(r) { %> 
+          <tr>
+            <td> <%=r.major%> </td>
+            <td> <%=r.uname%> </td>
+            <td> <%=r.id%> </td>
+            <td> <%=r.phonenumber%></td>
+          </tr>
+    <% }); %> 
+</table>
+  </ul>
+  </body>
 </html>

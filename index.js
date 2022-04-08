@@ -20,7 +20,7 @@ const { memoryStorage } = require('multer');
 var cors = require('cors')
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 
-  "postgres://postgres:1234@localhost/postgres"
+  "postgres://postgres:@localhost/s2s"
   // ssl: {
   //   rejectUnauthorized: false
   // }
@@ -165,6 +165,18 @@ const pool = new Pool({
       res.status(401).send(`Please login to view this page! <a href=\'/login'>click to go back to login page</a>`)
     }
     
+  })
+  app.post('/findcourse', (req,res)=>{
+    var major = req.body.major;
+    pool.query(`Select * from userprof where major = '${major}'`, (err,result)=>{
+      if(err){
+        res.status(401).send(`invalid major or no people in this major <a href=\'/dashboard'>click to go back to dashboard page</a>`)
+      }
+      else{
+        var results = {'rows': result.rows}
+        res.render('pages/major_list',results)
+      }
+    })
   })
   app.get('/message_sending', (req,res) =>{
     if(req.session.loggedin){

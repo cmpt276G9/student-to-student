@@ -30,8 +30,18 @@
         <form action="/updateinfo" method="post">
           <label for="age">age*</label>
        <input type="text" name="age" /> 
-       <label for="major">major*</label>
-       <input type="text" name="major" /> 
+       <label for="major">major* (please select one from drop-down box)</label>
+       <input list="course_option" name="major"/> 
+       <datalist id = "course_option">
+         <option>CMPT</option>
+         <option>ECON</option>
+         <option>BUSI</option>
+         <option>ENVI</option>
+         <option>ARTS</option>
+         <option>ENSC</option>
+         <option>PSYC</option>
+         <option>STAT</option>
+       </datalist>
        <label for="phonenumber">phone number*</label>
        <input type="text" name="phonenumber" /> 
         <input  type="submit" name="submit" />
