@@ -25,14 +25,11 @@
             </select>
             </ul>
         </header>
-              <div>
-              <img  src="image/s2s-11.png"  alt="" class="biglogo">
-          </div>
-        <div id = "msg_content">
+        <div id = "msg_content" style = "  width:580px; height:420px; border:1px solid #666; background:#fff; margin:10px auto 0; overflow:auto;">
         </div>
         <br>
-        <div >
-          <form id = "send_bar">
+        <div style = " width:580px; margin:10px auto 0;">
+          <form  id = "send_bar">
             <input id = "msg" type = "text">
             <button type = "submit" id = "submit_msg">Send</button>
           </form>
@@ -59,7 +56,6 @@
               socket.emit('send-msg', msginfo);
               msgInput.value = '';
             })
-
             function display_msg( msg ){
               const msgline = document.createElement('div')
               msgline.innerText = msg;

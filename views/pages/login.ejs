@@ -20,17 +20,26 @@
       </header>
 <h1 class ="te" >
     login
-</h1>
+</h1> 
 
     <form class = "table" action="/logindata" method = "post">
-        <label for="Useraccount">Useraccount</label>
-        <input type="text" name = "Useraccount" value="" placeholder="Useraccount">
+    <ul class = "tips">
+        <% if(typeof errors != 'undefined'){ %>
+            <% errors.forEach(error => { %>
+                <li><%= error.message %></li>
+            <% }) %>
+        <% } %>
+    </ul >
+        <label for="Useraccount">Useraccount</label>     
+        <input type="text" name = "Useraccount" value="" placeholder="Useraccount">       
         <br>
         <label for="password">password</label>
         <input type="password" name = "password" value="" placeholder="password">
         <br>
         <input type="submit" name = "sub" value="submit">
     </form>
+    <br>
     <div class = "te"><a href="/register">register</a></div> 
+
 </body>
 </html>

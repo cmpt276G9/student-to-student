@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
+</head>
+<head>
+<link rel="stylesheet" href="../stylesheets/home.css" media="screen">
+<link rel="stylesheet" href="../stylesheets/sellbook.css" media="screen">
+<script src="/index.js"></script>
+
+</head>
+    <style>
+      #map{
+        height: 500px;
+        width: 800px;
+        float: center;
+        margin:auto;
+        margin-top: -450px;
+        margin-left: 800px;
+      }
+    </style>
+    <script>
+      function initMap() {
+  const Renderer = new google.maps.DirectionsRenderer();
+  const Service = new google.maps.DirectionsService();
+  const Vancouver = { lat: 49.246292, lng: -123.116226 };
+  const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 4,
+    center: Vancouver,
+  });
+  const marker = new google.maps.Marker({
+    position: Vancouver,
+    map: map,
+  });
+  Renderer.setMap(map)
+  calculateRoute(Service,Renderer)
+  document.getElementById("mode").addEventListener("change",()=>{
+    calculateRoute(Service,Renderer)
+  })
+}
+function calculateRoute(Service,Renderer){
+  const mode = document.getElementById("mode").value;
+  Service.route({
+    origin: document.getElementById("from").value,
+    destination: document.getElementById("to").value,
+    travelMode: google.maps.TravelMode[mode]
+  })
+  .then((response)=>{
+    Renderer.setDirections(response)
+  })
+  .catch((e)=>window.alert("request failed due to "+ status))
+}
+    </script>
+  </head>
+    <body ><header>
+      <div>
+          <a href="/dashboard"  data-image-width="200" data-image-height="200">
+            <img src="../image/s2s2.png" class = "logo">
+          </a>
+      </div>
+          <br></br>
+              <ul class = "top"><a class = "linkk" ><a href="/dashboard" style="padding: 10px 10px;">Home</a>
+              <select onchange="window.location=this.value;">
+              <option>Hi! </option>
+              <option value="/user_profile">Your account</option>
+              <option value="/logout">Logout</option> 
+              <option value="/manager_dashboard">go to manager view</option>
+              </select>
+              </ul>
+    <h2 class = "te" style="float: center; margin-top: -5%;">Google Map</h2>
+    <p class = "te" style="float: center;">This map will help you find trading locations</p>
+    <div style="margin-left: 20%; ">
+    <form>
+      <label for="from" >Your Location</label>
+      <input type="text" id ="from" placeholder="Origin">
+      <img src="../image/decrease.png" style="width: 20px; height: 20px;">
+      <label for="to" >Destination</label>
+      <input type="text" id ="to" placeholder="Destination">
+      <img src="../image/decrease.png" style="width: 20px; height: 20px;">
+    </form>
+      <b>Mode of travel</b>
+      <select id = "mode">
+        <option value="DRIVING">Driving</option>
+        <option value="BICYCLING">Bicycling</option>
+        <option value="TRANSIT">Transit</option>
+        <option value="WALKING">Walking</option>
+      </select>
+      <img src="../image/right-arrow.png" style="width: 100px; height: 100px; margin-top: 10%;">
+
+    </div>
+    
+
+    <div id="map"></div>
+    <div id = "output">
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_lNP7G_bJ9JDKoHEgjswbbFBIJQTadUc&callback=initMap&v=weekly"
+      async 
+    ></script>
+  </div>
+  <div style="margin-top: -5%;">
+  <a href= "/findclassmate"  data-image-width="50px" data-image-height="50px">
+    <img src="../image/back-button.png" class = "minibut" >
+     <br>
+     back to find classmate page
+  </a>
+  
+   </div> 
+
+  </body>
+</html>

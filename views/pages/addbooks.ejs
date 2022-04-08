@@ -31,7 +31,13 @@
         </header>
         </body>
         <h5>book information</h5>
-
+        <ul class = "tips" style= "text-align:center;">
+          <% if(typeof errors != 'undefined'){ %>
+              <% errors.forEach(error => { %>
+                  <li><%= error.message %></li>
+              <% }) %>
+          <% } %>
+      </ul>
         <div class ="tables"> 
           <form class="table" action="/addbook" method="post" enctype="multipart/form-data" id="bookform">
             <label for="BookTitle">Book Title</label>
@@ -64,8 +70,8 @@
           <br>
         </div>
             <input type="submit" name = "sub" value="sellbook">
-           
         </form>
-        
+        <br>
+
     </div>
-       
+</html>
